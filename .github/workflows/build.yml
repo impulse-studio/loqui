@@ -1,0 +1,108 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+env:
+  TAG: ${{ inputs.version || github.ref_name }}
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      release_id: ${{ steps.create.outputs.id }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.version || github.ref_name }}
+
+      - name: Create release with auto-generated notes
+        id: create
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ inputs.version || github.ref_name }}"
+          gh release create "$TAG" \
+            --title "Loqui $TAG" \
+            --generate-notes
+
+          RELEASE_ID=$(gh api "repos/${{ github.repository }}/releases/tags/$TAG" --jq '.id')
+          echo "id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build (${{ matrix.name }})
+    needs: create-release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS
+            runner: macos-latest
+          - name: Linux
+            runner: ubuntu-22.04
+          - name: Windows
+            runner: windows-latest
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.version || github.ref_name }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+
+      - name: Install Linux dependencies
+        if: matrix.runner == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libasound2-dev \
+            libxdo-dev
+
+      - run: npm ci
+
+      # whisper-rs-sys bundles ggml which uses i8mm intrinsics guarded by
+      # __ARM_FEATURE_MATMUL_INT8. On macos-latest (M-series) the SDK defines
+      # this macro but the ggml cmake build doesn't add the matching -march flag,
+      # causing a compile error. Wrapping cc/c++ with -mcpu=apple-m1 (no i8mm)
+      # prevents the macro from being defined.
+      - name: Fix macOS ARM i8mm build error
+        if: matrix.runner == 'macos-latest'
+        run: |
+          printf '#!/bin/sh\nexec /usr/bin/cc "$@" -mcpu=apple-m1\n' > /tmp/cc-wrap
+          printf '#!/bin/sh\nexec /usr/bin/c++ "$@" -mcpu=apple-m1\n' > /tmp/cxx-wrap
+          chmod +x /tmp/cc-wrap /tmp/cxx-wrap
+          echo "CC=/tmp/cc-wrap" >> "$GITHUB_ENV"
+          echo "CXX=/tmp/cxx-wrap" >> "$GITHUB_ENV"
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MACOSX_DEPLOYMENT_TARGET: "10.15"
+        with:
+          releaseId: ${{ needs.create-release.outputs.release_id }}

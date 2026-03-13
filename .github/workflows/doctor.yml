@@ -1,0 +1,76 @@
+name: Doctor
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  react:
+    name: React Best Practices
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: File naming
+        run: bash .doctor/scripts/react/verify-file-naming.sh src
+
+      - name: Component format
+        run: bash .doctor/scripts/react/verify-component-format.sh src
+
+      - name: Name matching
+        run: bash .doctor/scripts/react/verify-name-match.sh src
+
+      - name: Unused files
+        run: bash .doctor/scripts/react/verify-unused-files.sh src
+
+      - name: Code duplication
+        run: bash .doctor/scripts/react/verify-duplicates.sh src --no-cache
+
+      - name: Max file size
+        run: bash .doctor/scripts/react/verify-max-file-size.sh src
+
+      - name: Import depth
+        run: bash .doctor/scripts/react/verify-import-depth.sh src
+
+      - name: Tailwind consistency
+        run: bash .doctor/scripts/react/verify-tailwind-consistency.sh src
+
+      - name: Index re-exports
+        run: bash .doctor/scripts/react/verify-index-reexports.sh src
+
+  rust:
+    name: Rust Best Practices
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Module style
+        run: bash .doctor/scripts/rust/verify-module-style.sh src-tauri/src
+
+      - name: File naming
+        run: bash .doctor/scripts/rust/verify-naming.sh src-tauri/src
+
+      - name: Error handling
+        run: bash .doctor/scripts/rust/verify-error-handling.sh src-tauri/src
+
+      - name: Command separation
+        run: bash .doctor/scripts/rust/verify-commands.sh src-tauri/src
+
+      - name: Function count
+        run: bash .doctor/scripts/rust/verify-function-count.sh src-tauri/src
+
+      - name: Max file size
+        run: bash .doctor/scripts/rust/verify-max-file-size.sh src-tauri/src
+
+      - name: Code duplication
+        run: bash .doctor/scripts/rust/verify-duplicates.sh src-tauri/src

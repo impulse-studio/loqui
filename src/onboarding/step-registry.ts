@@ -1,0 +1,34 @@
+import type { ComponentType } from "react";
+import StepWelcome from "./steps/step-welcome";
+import StepHotkey from "./steps/step-hotkey";
+import StepTest from "./steps/step-test";
+import StepComplete from "./steps/step-complete";
+
+export interface FooterConfig {
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+  loading?: boolean;
+  progress?: number;
+  onCancel?: () => void;
+}
+
+export interface StepComponentProps {
+  onComplete: () => void;
+  goNext: () => void;
+  setFooter: (config: FooterConfig | null) => void;
+}
+
+export interface StepEntry {
+  label: string;
+  component: ComponentType<StepComponentProps>;
+}
+
+const stepRegistry: StepEntry[] = [
+  { label: "Model", component: StepWelcome },
+  { label: "Hotkey", component: StepHotkey },
+  { label: "Test", component: StepTest },
+  { label: "Done", component: StepComplete },
+];
+
+export default stepRegistry;

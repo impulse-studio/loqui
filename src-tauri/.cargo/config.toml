@@ -1,0 +1,10 @@
+# whisper-rs-sys and llama-cpp-sys-2 both bundle ggml, causing duplicate symbols.
+# Allow multiple definitions to resolve this.
+[target.x86_64-unknown-linux-gnu]
+rustflags = ["-C", "link-arg=-Wl,--allow-multiple-definition"]
+
+[target.aarch64-unknown-linux-gnu]
+rustflags = ["-C", "link-arg=-Wl,--allow-multiple-definition"]
+
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "link-arg=/FORCE:MULTIPLE"]

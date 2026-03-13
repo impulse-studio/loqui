@@ -1,0 +1,42 @@
+[
+  {
+    "id": "whisper-tiny",
+    "name": "Tiny",
+    "fileName": "ggml-tiny.bin",
+    "size": 77691713,
+    "sha256": "be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21",
+    "url": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin",
+    "accuracyTier": "low",
+    "description": "Fastest model, lower accuracy. Good for quick tests."
+  },
+  {
+    "id": "whisper-base",
+    "name": "Base",
+    "fileName": "ggml-base.bin",
+    "size": 147951465,
+    "sha256": "60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe",
+    "url": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin",
+    "accuracyTier": "medium",
+    "description": "Good balance of speed and accuracy. Recommended for most users."
+  },
+  {
+    "id": "whisper-small",
+    "name": "Small",
+    "fileName": "ggml-small.bin",
+    "size": 487601967,
+    "sha256": "1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b",
+    "url": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin",
+    "accuracyTier": "high",
+    "description": "Higher accuracy, slower processing. Good for complex speech."
+  },
+  {
+    "id": "whisper-medium",
+    "name": "Medium",
+    "fileName": "ggml-medium.bin",
+    "size": 1533763059,
+    "sha256": "6c14d5adee5f86394037b4e4e8b59f1673b6cee10e3cf0b11bbdbee79c156208",
+    "url": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium.bin",
+    "accuracyTier": "very-high",
+    "description": "Best accuracy, requires more memory and processing time."
+  }
+]

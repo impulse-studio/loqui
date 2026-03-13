@@ -1,0 +1,65 @@
+# Ignore rules for duplicate detection
+# Committed to git — shared across team and CI
+#
+# Format:
+#   MAGIC:value             — ignore this magic string
+#   DUPE:fnNameA/fnNameB    — ignore function-level dupe pair
+#   BLOCK:parentA/parentB   — ignore sub-block dupe pair
+#   TYPE:typeA/typeB        — ignore type overlap pair
+#   HOOK:hookName/fnName    — ignore hook reuse suggestion
+#
+# Examples:
+#   MAGIC:very-high         — not a real identifier, just an enum variant
+#   DUPE:LoginForm/RegisterForm  — intentionally similar, different domains
+#   TYPE:ModelStatus/ModelInfo   — keep separate for API boundary reasons
+
+MAGIC:very-high
+MAGIC:onboardingComplete
+BLOCK:formatDuration/formatMinutes
+BLOCK:StepWelcome/Widget
+
+# Component variant props — not magic strings
+MAGIC:ghost
+MAGIC:secondary
+MAGIC:accent
+MAGIC:default
+
+# Config key — only 2 files, not worth extracting
+MAGIC:sttModel
+
+# Position value in options list + default state — different contexts
+MAGIC:bottom-center
+MAGIC:bottom-right
+
+# Cross-feature: App/Widget can't import from settings/ (import rules)
+HOOK:useSettingsConfig/App
+HOOK:useSettingsConfig/Widget
+
+# False positives: addEventListener/clearTimeout ≠ hotkey recording
+HOOK:useHotkeyRecorder/Modal
+HOOK:useHotkeyRecorder/TranscriptsPage
+HOOK:useHotkeyRecorder/Widget
+HOOK:useHotkeyRecorder/Select
+
+# onComplete callbacks both call getModels().then(setModels) — minimal shared pattern
+BLOCK:StepWelcome/SpeechModelModal
+
+# Widget listens to LLM download events, not STT — different event names
+BLOCK:useDownloadEvents/Widget
+
+# False positive: StepHotkey uses String() for error, not download events
+HOOK:useDownloadEvents/StepHotkey
+
+# False positives: SearchableSelect keyboard/animation ≠ hotkey recording or FFT
+HOOK:useHotkeyRecorder/SearchableSelect
+HOOK:useFftBars/SearchableSelect
+
+# SearchableSelectProps intentionally differs from SelectProps (badge field)
+TYPE:SearchableSelectProps/SelectProps
+
+# Escape key listeners in Modal and Select — trivial anonymous arrow functions
+DUPE:arrow/arrow
+HOOK:useClickOutside/Modal
+
+# False positive: GeneralSection uses String() for boolean conversion, not download events
+HOOK:useDownloadEvents/GeneralSection

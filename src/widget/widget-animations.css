@@ -1,0 +1,61 @@
+/* CSS Houdini — animatable custom property for rotating glow */
+@property --glow-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@layer base {
+  @keyframes glow-rotate {
+    from {
+      --glow-angle: 0deg;
+    }
+    to {
+      --glow-angle: 360deg;
+    }
+  }
+
+  @keyframes wave-bar {
+    0%,
+    100% {
+      transform: scaleY(0.15);
+    }
+    50% {
+      transform: scaleY(1);
+    }
+  }
+
+  @keyframes pulse-glow {
+    0%,
+    100% {
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+
+  @keyframes flash-success {
+    0% {
+      box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.6);
+    }
+    50% {
+      box-shadow: 0 0 12px 4px rgba(22, 163, 74, 0.4);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(22, 163, 74, 0);
+    }
+  }
+
+  @keyframes flash-error {
+    0% {
+      box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6);
+    }
+    50% {
+      box-shadow: 0 0 12px 4px rgba(220, 38, 38, 0.4);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+    }
+  }
+}
