@@ -1,0 +1,26 @@
+---
+import Base from "../layouts/base.astro";
+import Navbar from "../components/navbar.astro";
+import Hero from "../components/hero.astro";
+import Features from "../components/features.astro";
+import HowItWorks from "../components/how-it-works.astro";
+import Privacy from "../components/privacy.astro";
+import Testimonials from "../components/testimonials.astro";
+import Faq from "../components/faq.astro";
+import Footer from "../components/footer.astro";
+import "../styles/global.css";
+---
+
+<Base>
+  <Navbar />
+  <main>
+    <Hero />
+    <Features />
+    <HowItWorks />
+    <Privacy />
+    <Testimonials />
+    <Faq />
+  </main>
+  <Footer />
+  <script src="../scripts/download.ts"></script>
+</Base>

@@ -1,0 +1,57 @@
+---
+const steps = [
+  {
+    number: "1",
+    title: "Hold",
+    description: "Press your hotkey anywhere on your system. Default is Alt+Space  - fully customizable.",
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5h3m-6.75 2.25h10.5a2.25 2.25 0 002.25-2.25v-15a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 4.5v15a2.25 2.25 0 002.25 2.25z" />`,
+  },
+  {
+    number: "2",
+    title: "Speak",
+    description: "Talk naturally in any of 99+ languages. Whisper processes your speech locally in real time.",
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />`,
+  },
+  {
+    number: "3",
+    title: "Done",
+    description: "Polished text appears exactly where your cursor is. No copy-paste, no switching apps.",
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />`,
+  },
+];
+---
+
+<section id="how-it-works" class="py-20 sm:py-28 bg-bg-secondary">
+  <div class="mx-auto max-w-5xl px-6">
+    <div class="text-center">
+      <h2 class="text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
+        Three steps. Zero friction.
+      </h2>
+      <p class="mx-auto mt-4 max-w-2xl text-lg text-text-secondary">
+        From thought to text in seconds  - Loqui stays out of your way.
+      </p>
+    </div>
+
+    <div class="mt-16 grid gap-8 sm:grid-cols-3">
+      {steps.map((step, index) => (
+        <div class="relative text-center">
+          {/* Connector line */}
+          {index < steps.length - 1 && (
+            <div class="absolute top-10 left-[calc(50%+2.5rem)] hidden h-0.5 w-[calc(100%-3rem)] bg-gradient-to-r from-accent/30 to-accent/10 sm:block" />
+          )}
+
+          <div class="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-bg-card border border-border shadow-sm">
+            <svg class="h-8 w-8 text-accent" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" set:html={step.icon} />
+          </div>
+
+          <div class="mb-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-accent text-xs font-bold text-white">
+            {step.number}
+          </div>
+
+          <h3 class="text-xl font-bold text-text-primary">{step.title}</h3>
+          <p class="mt-2 text-sm leading-relaxed text-text-secondary">{step.description}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

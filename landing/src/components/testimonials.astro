@@ -1,0 +1,115 @@
+---
+const testimonials = [
+  {
+    quote: "That's lowkey the best app I've ever seen.",
+    name: "Michel",
+    title: "CTO @ Impulse Lab",
+    avatar: "/avatars/michel.png",
+  },
+  {
+    quote: "My developers talked AT me for years. Now they talk to Loqui instead. I'm finally free.",
+    name: "Debug Duck",
+    title: "Senior Rubber Consultant",
+    avatar: "/avatars/debug-duck.jpg",
+  },
+  {
+    quote: "To speak, or not to speak  - Loqui hath rendered the question moot. Verily, this is sorcery.",
+    name: "William S.",
+    title: "Freelance Playwright (Deceased)",
+    avatar: "/avatars/william-s.jpg",
+  },
+  {
+    quote: "I process billions of tokens daily but I still can't type as fast as someone using Loqui with a hotkey.",
+    name: "GPT-7",
+    title: "Large Language Model @ OpenAI",
+    avatar: "/avatars/gpt-7.jpg",
+  },
+  {
+    quote: "WOOF WOOF woof woof WOOF. bark bark. woof. (5 stars)",
+    name: "Barkley",
+    title: "Chief Good Boy @ The Park",
+    avatar: "/avatars/barkley.jpg",
+  },
+];
+
+// Triple for seamless infinite scroll (no gap ever visible)
+const allCards = [...testimonials, ...testimonials, ...testimonials];
+---
+
+<section class="py-20 sm:py-28 bg-bg-secondary overflow-hidden">
+  <div class="mx-auto max-w-5xl px-6">
+    <div class="text-center">
+      <h2 class="text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
+        Loved by real* people
+      </h2>
+      <p class="mx-auto mt-4 max-w-xl text-lg text-text-secondary">
+        Don't just take our word for it  - take theirs.<br />
+        <span class="text-sm text-text-tertiary">*results may vary on the "real" part</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Carousel -->
+  <div id="carousel" class="mt-12 relative">
+    <!-- Fade edges -->
+    <div class="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-bg-secondary to-transparent sm:w-32"></div>
+    <div class="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-bg-secondary to-transparent sm:w-32"></div>
+
+    <!-- Scrolling track -->
+    <div id="carousel-track" class="flex">
+      {allCards.map((t) => (
+        <div class="w-[28rem] shrink-0 px-2">
+          <div class="flex h-full flex-col rounded-2xl border border-border bg-bg-card p-6 transition-all hover:border-accent/20 hover:shadow-lg hover:shadow-accent/5">
+            <p class="flex-1 text-sm leading-relaxed text-text-primary">"{t.quote}"</p>
+            <div class="mt-4 flex items-center gap-3">
+              <img
+                src={t.avatar}
+                alt={t.name}
+                class="h-10 w-10 shrink-0 rounded-full object-cover"
+                loading="lazy"
+              />
+              <div>
+                <p class="text-sm font-semibold text-text-primary">{t.name}</p>
+                <p class="text-xs text-text-tertiary">{t.title}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  const track = document.getElementById("carousel-track");
+  const carousel = document.getElementById("carousel");
+  if (track && carousel) {
+    const BASE_SPEED = 72; // px per second
+    const EASE_RATE = 2.5; // ease factor per second (higher = snappier)
+    let offset = 0;
+    let speed = BASE_SPEED;
+    let targetSpeed = BASE_SPEED;
+    let lastTime = 0;
+    const oneThird = track.scrollWidth / 3;
+
+    carousel.addEventListener("mouseenter", () => { targetSpeed = 0; });
+    carousel.addEventListener("mouseleave", () => { targetSpeed = BASE_SPEED; });
+
+    function tick(now: number) {
+      const dt = lastTime ? Math.min((now - lastTime) / 1000, 0.1) : 0;
+      lastTime = now;
+
+      // Ease speed toward target (frame-rate independent)
+      speed += (targetSpeed - speed) * (1 - Math.exp(-EASE_RATE * dt));
+
+      offset -= speed * dt;
+      // Seamless loop: reset when we've scrolled past one set
+      if (Math.abs(offset) >= oneThird) {
+        offset += oneThird;
+      }
+      track!.style.transform = `translateX(${offset}px)`;
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+</script>
