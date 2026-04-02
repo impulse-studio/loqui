@@ -91,5 +91,6 @@ jobs:
     uses: ./.github/workflows/build.yml
     with:
       version: v${{ needs.bump.outputs.version }}
+    secrets: inherit
     permissions:
       contents: write
