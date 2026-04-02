@@ -111,7 +111,8 @@ jobs:
           KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
           KEYCHAIN_PASSWORD="$(openssl rand -base64 24)"
 
-          echo "$APPLE_CERTIFICATE" | base64 --decode > "$CERT_PATH"
+          echo "$APPLE_CERTIFICATE" | base64 -D > "$CERT_PATH"
+          echo "Certificate file size: $(wc -c < "$CERT_PATH") bytes"
 
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security default-keychain -s "$KEYCHAIN_PATH"
@@ -120,8 +121,7 @@ jobs:
 
           security import "$CERT_PATH" \
             -P "$APPLE_CERTIFICATE_PASSWORD" \
-            -A -t cert -f pkcs12 \
-            -k "$KEYCHAIN_PATH"
+            -A -k "$KEYCHAIN_PATH"
 
           security set-key-partition-list \
             -S apple-tool:,apple: \
