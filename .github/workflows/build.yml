@@ -111,9 +111,7 @@ jobs:
           KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
           KEYCHAIN_PASSWORD="$(openssl rand -base64 24)"
 
-          echo "Secret length: ${#APPLE_CERTIFICATE} chars"
           printf '%s' "$APPLE_CERTIFICATE" | base64 -D > "$CERT_PATH"
-          echo "Certificate file size: $(wc -c < "$CERT_PATH") bytes"
 
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security default-keychain -s "$KEYCHAIN_PATH"
@@ -123,6 +121,11 @@ jobs:
           security import "$CERT_PATH" \
             -P "$APPLE_CERTIFICATE_PASSWORD" \
             -A -k "$KEYCHAIN_PATH"
+
+          # Install Apple intermediate CA for valid chain of trust
+          curl -sO https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer
+          security import DeveloperIDG2CA.cer -k "$KEYCHAIN_PATH"
+          rm DeveloperIDG2CA.cer
 
           security set-key-partition-list \
             -S apple-tool:,apple: \
