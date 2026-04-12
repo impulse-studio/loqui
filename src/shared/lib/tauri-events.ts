@@ -40,9 +40,6 @@ export interface ModelLoadedPayload {
 
 export interface AudioLevelPayload {
   level: number;
-  rms: number;
-  db: number;
-  chunkSize: number;
 }
 
 export interface HotkeyStatePayload {

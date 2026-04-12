@@ -19,7 +19,6 @@ export default function StepMicrophone({ goNext, setFooter }: StepComponentProps
   const [selectedDevice, setSelectedDevice] = useState("default");
   const [testing, setTesting] = useState(false);
   const [level, setLevel] = useState(0);
-  const [debug, setDebug] = useState({ rms: 0, db: -100, chunkSize: 0 });
   const updateConfig = useAgentStore((s) => s.updateConfig);
   const testingRef = useRef(false);
 
@@ -41,7 +40,6 @@ export default function StepMicrophone({ goNext, setFooter }: StepComponentProps
     (payload: AudioLevelPayload) => {
       if (testingRef.current) {
         setLevel(payload.level);
-        setDebug({ rms: payload.rms, db: payload.db, chunkSize: payload.chunkSize });
       }
     },
     [],
@@ -177,16 +175,6 @@ export default function StepMicrophone({ goNext, setFooter }: StepComponentProps
           />
         </div>
       </div>
-
-      {/* Debug info */}
-      {testing && (
-        <div className="mt-3 text-left font-mono text-xs text-text-tertiary bg-bg-tertiary rounded-lg p-3 space-y-1">
-          <div>RMS: {debug.rms.toFixed(6)}</div>
-          <div>dB: {debug.db.toFixed(1)}</div>
-          <div>Level: {(level * 100).toFixed(1)}%</div>
-          <div>Chunk size: {debug.chunkSize}</div>
-        </div>
-      )}
     </div>
   );
 }

@@ -200,12 +200,7 @@ fn process_samples<R: Runtime>(
         // Convert to dB scale: -60dB..-20dB → 0.0..1.0
         let db = if peak > 0.0 { 20.0 * peak.log10() } else { -100.0 };
         let level = ((db + 60.0) / 40.0).clamp(0.0, 1.0);
-        let _ = app_handle.emit("audio-level", serde_json::json!({
-            "level": level,
-            "rms": peak,
-            "db": db,
-            "chunkSize": data.len()
-        }));
+        let _ = app_handle.emit("audio-level", serde_json::json!({ "level": level }));
     }
 }
 
