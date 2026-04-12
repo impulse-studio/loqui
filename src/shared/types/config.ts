@@ -30,6 +30,7 @@ export interface AppConfig {
   defaultProfileId: string;
   sttModel: string;
   sttLanguage: string;
+  microphoneDevice: string;
   llmProvider: LlmProvider;
   llmApiKey: string;
   llmModel: string;
@@ -53,6 +54,7 @@ export const DEFAULT_CONFIG: Partial<AppConfig> = {
   hotkey: "alt+space",
   sttModel: "whisper-base",
   sttLanguage: "auto",
+  microphoneDevice: "default",
   llmProvider: "local",
   llmEnabled: "false",
   autoPaste: "true",

@@ -1,10 +1,17 @@
 use crate::audio::capture::AudioCapture;
+use crate::audio::devices::{self, AudioDevice};
 use crate::error::AppError;
+use crate::state::AppState;
+use crate::storage::config::ConfigStore;
 use crate::stt::model_manager;
 use crate::stt::types::TranscriptionResult;
 use crate::stt::whisper::WhisperEngine;
-use crate::state::AppState;
 use tauri::Emitter;
+
+#[tauri::command]
+pub async fn get_audio_devices() -> Result<Vec<AudioDevice>, AppError> {
+    devices::list_input_devices()
+}
 
 #[tauri::command]
 pub async fn load_stt_model(
@@ -42,7 +49,15 @@ pub async fn start_recording(
     state: tauri::State<'_, AppState>,
     app_handle: tauri::AppHandle,
 ) -> Result<(), AppError> {
-    let capture = AudioCapture::start(&app_handle)?;
+    let device_name = {
+        let db = state.db.lock().map_err(|_| AppError::LockPoisoned)?;
+        db.get_config("microphoneDevice")
+            .ok()
+            .flatten()
+            .unwrap_or_default()
+    };
+
+    let capture = AudioCapture::start(&app_handle, &device_name)?;
 
     let mut guard = state
         .audio_capture

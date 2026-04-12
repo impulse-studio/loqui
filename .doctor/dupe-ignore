@@ -63,3 +63,12 @@ HOOK:useClickOutside/Modal
 
 # False positive: GeneralSection uses String() for boolean conversion, not download events
 HOOK:useDownloadEvents/GeneralSection
+
+# "Continue" label used across all onboarding steps — UI text, not a magic config key
+MAGIC:Continue
+
+# Config key — only 2 files (onboarding + settings), not worth extracting
+MAGIC:microphoneDevice
+
+# False positive: StepMicrophone uses Math.min for level clamping, not FFT bars
+HOOK:useFftBars/StepMicrophone

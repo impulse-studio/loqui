@@ -86,6 +86,15 @@ export async function setHotkey(hotkey: string): Promise<void> {
   return invoke("set_hotkey", { hotkey });
 }
 
+export interface AudioDevice {
+  name: string;
+  isDefault: boolean;
+}
+
+export async function getAudioDevices(): Promise<AudioDevice[]> {
+  return invoke("get_audio_devices");
+}
+
 export async function loadSttModel(modelId: string): Promise<void> {
   return invoke("load_stt_model", { modelId });
 }

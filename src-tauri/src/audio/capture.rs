@@ -1,10 +1,12 @@
 use crate::error::AppError;
-use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
+use cpal::traits::{DeviceTrait, StreamTrait};
 use cpal::SampleFormat;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
+use std::time::{Duration, Instant};
 use tauri::{AppHandle, Emitter, Runtime};
 
+use super::devices;
 use super::dsp;
 use super::types::AudioBuffer;
 
@@ -18,11 +20,11 @@ pub struct AudioCapture {
 }
 
 impl AudioCapture {
-    pub fn start<R: Runtime>(app_handle: &AppHandle<R>) -> Result<Self, AppError> {
-        let host = cpal::default_host();
-        let device = host
-            .default_input_device()
-            .ok_or_else(|| AppError::Audio("no input device available".to_string()))?;
+    pub fn start<R: Runtime>(
+        app_handle: &AppHandle<R>,
+        device_name: &str,
+    ) -> Result<Self, AppError> {
+        let device = devices::find_device_by_name(device_name)?;
 
         let config = device
             .default_input_config()
@@ -36,7 +38,10 @@ impl AudioCapture {
 
         let samples_clone = samples.clone();
         let app_handle_clone = app_handle.clone();
+        let error_handle = app_handle.clone();
         let stop_clone = stop_flag.clone();
+        let level_state: Arc<Mutex<LevelState>> =
+            Arc::new(Mutex::new(LevelState { last_emit: Instant::now(), peak_rms: 0.0 }));
 
         let stream_config = config.config();
         let sample_format = config.sample_format();
@@ -50,13 +55,17 @@ impl AudioCapture {
             let stream_result = match sample_format {
                 SampleFormat::F32 => device.build_input_stream(
                     &stream_config,
-                    move |data: &[f32], _: &cpal::InputCallbackInfo| {
-                        process_samples(data, device_channels, &samples_clone, &app_handle_clone);
+                    {
+                        let level = level_state.clone();
+                        move |data: &[f32], _: &cpal::InputCallbackInfo| {
+                            process_samples(data, &samples_clone, &app_handle_clone, &level);
+                        }
                     },
                     err_fn,
                     None,
                 ),
                 SampleFormat::I16 => {
+                    let level = level_state.clone();
                     device.build_input_stream(
                         &stream_config,
                         move |data: &[i16], _: &cpal::InputCallbackInfo| {
@@ -66,9 +75,9 @@ impl AudioCapture {
                                 .collect();
                             process_samples(
                                 &float_data,
-                                device_channels,
                                 &samples_clone,
                                 &app_handle_clone,
+                                &level,
                             );
                         },
                         err_fn,
@@ -76,7 +85,9 @@ impl AudioCapture {
                     )
                 }
                 _ => {
-                    log::error!("unsupported sample format: {sample_format:?}");
+                    let msg = format!("unsupported sample format: {sample_format:?}");
+                    log::error!("{msg}");
+                    let _ = error_handle.emit("audio-error", serde_json::json!({ "error": msg }));
                     return;
                 }
             };
@@ -84,13 +95,17 @@ impl AudioCapture {
             let stream = match stream_result {
                 Ok(s) => s,
                 Err(e) => {
-                    log::error!("failed to build audio stream: {e}");
+                    let msg = format!("failed to build audio stream: {e}");
+                    log::error!("{msg}");
+                    let _ = error_handle.emit("audio-error", serde_json::json!({ "error": msg }));
                     return;
                 }
             };
 
             if let Err(e) = stream.play() {
-                log::error!("failed to start audio stream: {e}");
+                let msg = format!("failed to start audio stream: {e}");
+                log::error!("{msg}");
+                let _ = error_handle.emit("audio-error", serde_json::json!({ "error": msg }));
                 return;
             }
 
@@ -141,22 +156,56 @@ impl AudioCapture {
     }
 }
 
+/// Throttle state for audio level events (~20 fps).
+struct LevelState {
+    last_emit: Instant,
+    peak_rms: f32,
+}
+
+const LEVEL_EMIT_INTERVAL: Duration = Duration::from_millis(50);
+
 fn process_samples<R: Runtime>(
     data: &[f32],
-    _channels: u16,
     samples: &Arc<Mutex<Vec<f32>>>,
     app_handle: &AppHandle<R>,
+    level_state: &Arc<Mutex<LevelState>>,
 ) {
     if let Ok(mut buf) = samples.lock() {
         buf.extend_from_slice(data);
     }
 
-    if !data.is_empty() {
-        let sum: f32 = data.iter().map(|s| s * s).sum();
-        #[allow(clippy::cast_precision_loss)]
-        let rms = (sum / data.len() as f32).sqrt();
-        let level = (rms * 10.0).min(1.0);
-        let _ = app_handle.emit("audio-level", serde_json::json!({ "level": level }));
+    if data.is_empty() {
+        return;
+    }
+
+    let sum: f32 = data.iter().map(|s| s * s).sum();
+    #[allow(clippy::cast_precision_loss)]
+    let rms = (sum / data.len() as f32).sqrt();
+
+    if let Ok(mut state) = level_state.lock() {
+        // Track peak RMS across chunks
+        if rms > state.peak_rms {
+            state.peak_rms = rms;
+        }
+
+        // Only emit at ~20 fps
+        if state.last_emit.elapsed() < LEVEL_EMIT_INTERVAL {
+            return;
+        }
+
+        let peak = state.peak_rms;
+        state.peak_rms = 0.0;
+        state.last_emit = Instant::now();
+
+        // Convert to dB scale: -60dB..-20dB → 0.0..1.0
+        let db = if peak > 0.0 { 20.0 * peak.log10() } else { -100.0 };
+        let level = ((db + 60.0) / 40.0).clamp(0.0, 1.0);
+        let _ = app_handle.emit("audio-level", serde_json::json!({
+            "level": level,
+            "rms": peak,
+            "db": db,
+            "chunkSize": data.len()
+        }));
     }
 }
 

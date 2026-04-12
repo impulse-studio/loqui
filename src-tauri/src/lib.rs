@@ -102,6 +102,7 @@ pub fn run() {
             commands::stt::cancel_download,
             commands::stt::verify_model,
             commands::hotkey::set_hotkey,
+            commands::audio::get_audio_devices,
             commands::audio::load_stt_model,
             commands::audio::start_recording,
             commands::audio::stop_recording,

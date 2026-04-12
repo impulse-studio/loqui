@@ -38,9 +38,11 @@ pub fn on_press(app_handle: &AppHandle) {
 
     // 1. Detect active app before we steal focus
     let (app_name, window_title) = detector::get_frontmost_app();
-
-    // 2. Start audio capture
-    match AudioCapture::start(app_handle) {
+    // 2. Start audio capture (use configured device or default)
+    let db = state.db.lock().unwrap_or_else(|e| e.into_inner());
+    let device_name = db.get_config("microphoneDevice").ok().flatten().unwrap_or_default();
+    drop(db);
+    match AudioCapture::start(app_handle, &device_name) {
         Ok(capture) => {
             let mut guard = state.audio_capture.lock().unwrap_or_else(|e| e.into_inner());
             *guard = Some(capture);
@@ -65,7 +67,6 @@ pub fn on_press(app_handle: &AppHandle) {
         });
     }
 
-    // 4. Emit recording state
     let _ = emit_state(app_handle, "recording");
 }
 
@@ -260,7 +261,7 @@ fn process_recording(app_handle: &AppHandle, context: RecordingContext) -> Resul
         }
     }
 
-    // 8. Success → idle
+    // Success → idle
     let _ = emit_state(app_handle, "success");
     std::thread::sleep(std::time::Duration::from_millis(1500));
     let _ = emit_state(app_handle, "idle");
