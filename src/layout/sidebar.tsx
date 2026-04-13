@@ -1,9 +1,14 @@
 import { NavLink } from "react-router-dom";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { open } from "@tauri-apps/plugin-shell";
 import cn from "../shared/lib/utils/cn";
+import appVersion from "../shared/constants/app-version";
+import useUpdateCheck from "../shared/hooks/use-update-check";
 import sidebarNavItems from "./sidebar-nav-items";
 
 export default function Sidebar() {
+  const updateAvailable = useUpdateCheck();
+
   return (
     <aside className="w-[172px] min-w-[172px] h-full bg-bg-secondary border-r border-border flex flex-col">
       <div
@@ -48,6 +53,18 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      <div className="px-4 py-3 border-t border-border">
+        <div className="text-[11px] text-text-tertiary">v{appVersion}</div>
+        {updateAvailable && (
+          <button
+            onClick={() => open("https://loqui.impulselab.ai")}
+            className="text-[11px] text-accent hover:underline"
+          >
+            Update available
+          </button>
+        )}
+      </div>
     </aside>
   );
 }
