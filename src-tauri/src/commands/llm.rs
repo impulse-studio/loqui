@@ -2,8 +2,8 @@ use crate::commands::model_helpers;
 use crate::error::AppError;
 use crate::llm::{engine::LlmEngine, model_manager, types::LlmModelStatus};
 use crate::state::AppState;
-use crate::storage::config::ConfigStore;
 use crate::storage::profiles::ProfileStore;
+use crate::storage::secrets::SecretStore;
 use crate::storage::transcripts::TranscriptStore;
 use tauri::Emitter;
 
@@ -103,11 +103,22 @@ pub async fn test_refactor(
     profile_id: Option<String>,
     state: tauri::State<'_, AppState>,
 ) -> Result<crate::llm::types::RefactorResult, AppError> {
-    let profile = if let Some(pid) = &profile_id {
+    let (profile, api_key) = {
         let db = state.db.lock().map_err(|_| AppError::LockPoisoned)?;
-        db.get_profile(pid).ok()
-    } else {
-        None
+        let profile = if let Some(pid) = &profile_id {
+            db.get_profile(pid).ok()
+        } else {
+            None
+        };
+        let provider = profile
+            .as_ref()
+            .map_or("local".to_string(), |p| p.llm_provider.clone());
+        let api_key = if provider != "local" && provider != "disabled" && !provider.is_empty() {
+            crate::llm::remote::load_api_key(&db, &provider)?.unwrap_or_default()
+        } else {
+            String::new()
+        };
+        (profile, api_key)
     };
 
     let ctx_size = profile.as_ref().map_or(4096, |p| p.context_size as u32);
@@ -117,18 +128,7 @@ pub async fn test_refactor(
     let full_prompt = crate::agent::refactor::build_system_prompt(&system_prompt);
 
     if provider != "local" && provider != "disabled" && !provider.is_empty() {
-        let first_upper = provider
-            .chars()
-            .next()
-            .map_or(String::new(), |c| c.to_uppercase().to_string() + &provider[1..]);
-        let api_key_name = format!("llmApiKey{first_upper}");
-
-        let (api_key, model_name) = {
-            let db = state.db.lock().map_err(|_| AppError::LockPoisoned)?;
-            let key = db.get_config(&api_key_name).ok().flatten().unwrap_or_default();
-            let model = profile.as_ref().map_or(String::new(), |p| p.llm_model.clone());
-            (key, model)
-        };
+        let model_name = profile.as_ref().map_or(String::new(), |p| p.llm_model.clone());
 
         let result = crate::llm::remote::refactor_remote(
             &provider,
@@ -185,16 +185,14 @@ pub async fn get_llm_api_key_status(
     state: tauri::State<'_, AppState>,
 ) -> Result<ApiKeyStatus, AppError> {
     let db = state.db.lock().map_err(|_| AppError::LockPoisoned)?;
-    let has_key = |name: &str| -> bool {
-        db.get_config(name)
-            .ok()
-            .flatten()
-            .map_or(false, |v| !v.is_empty())
+    let has_key = |provider: &str| -> bool {
+        db.has_api_key(&crate::llm::remote::secret_account(provider))
+            .unwrap_or(false)
     };
     Ok(ApiKeyStatus {
-        openai: has_key("llmApiKeyOpenai"),
-        anthropic: has_key("llmApiKeyAnthropic"),
-        google: has_key("llmApiKeyGoogle"),
+        openai: has_key("openai"),
+        anthropic: has_key("anthropic"),
+        google: has_key("google"),
     })
 }
 

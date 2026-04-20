@@ -26,6 +26,9 @@ pub enum AppError {
     #[error("llm error: {0}")]
     Llm(String),
 
+    #[error("secret error: {0}")]
+    Secret(String),
+
     #[error("lock poisoned")]
     LockPoisoned,
 

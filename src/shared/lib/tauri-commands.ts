@@ -155,6 +155,40 @@ export async function getLlmApiKeyStatus(): Promise<ApiKeyStatus> {
   return invoke("get_llm_api_key_status");
 }
 
+export async function saveLlmApiKey(provider: string, key: string): Promise<void> {
+  return invoke("save_llm_api_key", { provider, key });
+}
+
+export async function hasLlmApiKey(provider: string): Promise<boolean> {
+  return invoke("has_llm_api_key", { provider });
+}
+
+export async function deleteLlmApiKey(provider: string): Promise<void> {
+  return invoke("delete_llm_api_key", { provider });
+}
+
+// Cloud STT commands
+
+export async function saveSttApiKey(provider: string, key: string): Promise<void> {
+  return invoke("save_stt_api_key", { provider, key });
+}
+
+export async function hasSttApiKey(provider: string): Promise<boolean> {
+  return invoke("has_stt_api_key", { provider });
+}
+
+export async function deleteSttApiKey(provider: string): Promise<void> {
+  return invoke("delete_stt_api_key", { provider });
+}
+
+export async function testSttProvider(
+  provider: string,
+  apiKey?: string,
+  customEndpoint?: string,
+): Promise<void> {
+  return invoke("test_stt_provider", { provider, apiKey, customEndpoint });
+}
+
 export interface RemoteModelEntry {
   id: string;
   name: string;
@@ -174,6 +208,61 @@ export async function exportTranscripts(path: string): Promise<void> {
 
 export async function applyWidgetSettings(): Promise<void> {
   return invoke("apply_widget_settings");
+}
+
+export async function getPlatform(): Promise<string> {
+  return invoke("get_platform");
+}
+
+// macOS permissions (tauri-plugin-macos-permissions). Non-macOS platforms have
+// no such concept — we short-circuit to `true`. On macOS any plugin error is
+// surfaced (returns `false`) so the UI doesn't silently skip the step.
+
+let platformCache: string | null = null;
+
+async function isMacOS(): Promise<boolean> {
+  if (platformCache === null) {
+    try {
+      platformCache = await getPlatform();
+    } catch {
+      platformCache = "unknown";
+    }
+  }
+  return platformCache === "macos";
+}
+
+async function invokeMacosPermission(cmd: string): Promise<boolean> {
+  if (!(await isMacOS())) return true;
+  try {
+    return await invoke<boolean>(`plugin:macos-permissions|${cmd}`);
+  } catch (e) {
+    console.error(`macos-permissions plugin error on ${cmd}:`, e);
+    return false;
+  }
+}
+
+export function checkMicrophonePermission(): Promise<boolean> {
+  return invokeMacosPermission("check_microphone_permission");
+}
+
+export function requestMicrophonePermission(): Promise<boolean> {
+  return invokeMacosPermission("request_microphone_permission");
+}
+
+export function checkAccessibilityPermission(): Promise<boolean> {
+  return invokeMacosPermission("check_accessibility_permission");
+}
+
+export function requestAccessibilityPermission(): Promise<boolean> {
+  return invokeMacosPermission("request_accessibility_permission");
+}
+
+export function checkInputMonitoringPermission(): Promise<boolean> {
+  return invokeMacosPermission("check_input_monitoring_permission");
+}
+
+export function requestInputMonitoringPermission(): Promise<boolean> {
+  return invokeMacosPermission("request_input_monitoring_permission");
 }
 
 export async function enableAutostart(): Promise<void> {

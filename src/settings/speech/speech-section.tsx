@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Card from "../../shared/components/card";
-import { DEFAULT_CONFIG } from "../../shared/types/config";
+import Select from "../../shared/components/select";
+import { DEFAULT_CONFIG, type SttProvider } from "../../shared/types/config";
 import {
   getAudioDevices,
   getModels,
@@ -10,8 +11,16 @@ import {
 import tierLabels from "../../shared/components/model-card/tier-labels";
 import useSettingsConfig from "../use-settings-config";
 import SpeechModelModal from "./speech-model-modal";
+import CloudProviderPicker from "../../shared/components/cloud-provider-picker";
+import cn from "../../shared/lib/utils/cn";
+
+type Mode = "local" | "cloud";
 
 export default function SpeechSection() {
+  const [mode, setMode] = useState<Mode>("local");
+  const [provider, setProvider] = useState<SttProvider>("local");
+  const [remoteModel, setRemoteModel] = useState("");
+  const [customEndpoint, setCustomEndpoint] = useState("");
   const [modelId, setModelId] = useState(DEFAULT_CONFIG.sttModel!);
   const [modelName, setModelName] = useState("\u2014");
   const [showModelModal, setShowModelModal] = useState(false);
@@ -19,6 +28,12 @@ export default function SpeechSection() {
   const [selectedDevice, setSelectedDevice] = useState("default");
 
   useSettingsConfig((cfg) => {
+    const nextProvider = (cfg.sttProvider as SttProvider) ?? "local";
+    setProvider(nextProvider);
+    setMode(nextProvider === "local" ? "local" : "cloud");
+    setRemoteModel(cfg.sttRemoteModel ?? "");
+    setCustomEndpoint(cfg.sttCustomEndpoint ?? "");
+
     if (cfg.sttModel) {
       setModelId(cfg.sttModel);
       getModels().then((models) => {
@@ -40,49 +55,115 @@ export default function SpeechSection() {
       .catch(console.error);
   }, []);
 
-  function handleDeviceChange(name: string) {
+  const deviceOptions = useMemo(
+    () =>
+      devices.map((d) => ({
+        value: d.name,
+        label: d.isDefault ? `${d.name} (Default)` : d.name,
+      })),
+    [devices],
+  );
+
+  const handleDeviceChange = useCallback((name: string) => {
     setSelectedDevice(name);
     setConfig("microphoneDevice", name).catch(console.error);
-  }
+  }, []);
+
+  const switchToLocal = useCallback(async () => {
+    setMode("local");
+    await setConfig("sttProvider", "local");
+    await setConfig("sttRemoteModel", "");
+    await setConfig("sttCustomEndpoint", "");
+    setProvider("local");
+    setRemoteModel("");
+    setCustomEndpoint("");
+  }, []);
 
   return (
     <section className="mb-8">
       <h2 className="text-base font-semibold mb-3">Speech Recognition</h2>
-      <Card className="divide-y divide-border">
-        <div className="flex items-center justify-between px-5 py-4">
-          <div>
-            <div className="text-sm font-medium">Current model</div>
-            <div className="text-xs text-text-secondary">{modelName}</div>
+
+      <div className="space-y-3">
+        <Card className="divide-y divide-border">
+          <div className="flex items-center justify-between px-5 py-4">
+            <div>
+              <div className="text-sm font-medium">Transcription mode</div>
+              <div className="text-xs text-text-secondary">
+                {mode === "local"
+                  ? "Runs fully on your device"
+                  : "Audio is sent to your chosen provider"}
+              </div>
+            </div>
+            <div className="flex gap-1 rounded-lg border border-border p-0.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("local");
+                  switchToLocal().catch(console.error);
+                }}
+                className={cn(
+                  "px-3 h-7 rounded-md text-xs font-medium transition-colors cursor-pointer",
+                  mode === "local"
+                    ? "bg-accent text-white"
+                    : "text-text-secondary hover:text-text-primary",
+                )}
+              >
+                Local
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("cloud")}
+                className={cn(
+                  "px-3 h-7 rounded-md text-xs font-medium transition-colors cursor-pointer",
+                  mode === "cloud"
+                    ? "bg-accent text-white"
+                    : "text-text-secondary hover:text-text-primary",
+                )}
+              >
+                Cloud
+              </button>
+            </div>
           </div>
-          <button
-            onClick={() => setShowModelModal(true)}
-            className="text-xs text-accent font-medium border border-accent rounded-lg px-3 py-1.5 hover:bg-accent-subtle"
-          >
-            Change
-          </button>
-        </div>
-        <div className="flex items-center justify-between px-5 py-4">
+
+          {mode === "local" ? (
+            <div className="flex items-center justify-between px-5 py-4">
+              <div>
+                <div className="text-sm font-medium">Current model</div>
+                <div className="text-xs text-text-secondary">{modelName}</div>
+              </div>
+              <button
+                onClick={() => setShowModelModal(true)}
+                className="text-xs text-accent font-medium border border-accent rounded-lg px-3 py-1.5 hover:bg-accent-subtle"
+              >
+                Change
+              </button>
+            </div>
+          ) : (
+            <div className="px-5 py-4">
+              <CloudProviderPicker
+                initialProvider={provider}
+                initialModel={remoteModel}
+                initialCustomEndpoint={customEndpoint}
+              />
+            </div>
+          )}
+        </Card>
+
+        <Card className="flex items-center justify-between px-5 py-4">
           <div>
             <div className="text-sm font-medium">Microphone</div>
-            <div className="text-xs text-text-secondary">Input device for dictation</div>
+            <div className="text-xs text-text-secondary">
+              Input device for dictation
+            </div>
           </div>
-          <select
+          <Select
+            options={deviceOptions}
             value={selectedDevice}
-            onChange={(e) => handleDeviceChange(e.target.value)}
-            className="text-sm bg-bg-tertiary text-text-primary border border-border rounded-lg px-3 py-1.5 max-w-[220px] truncate focus:outline-none focus:border-accent"
-          >
-            {devices.map((device) => (
-              <option key={device.name} value={device.name}>
-                {device.name}{device.isDefault ? " (Default)" : ""}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="flex items-center justify-between px-5 py-4">
-          <span className="text-sm">Language</span>
-          <span className="text-sm text-text-secondary">Auto-detect</span>
-        </div>
-      </Card>
+            onChange={handleDeviceChange}
+            placeholder="Select device"
+          />
+        </Card>
+      </div>
 
       <SpeechModelModal
         open={showModelModal}

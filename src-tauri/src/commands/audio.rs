@@ -3,6 +3,7 @@ use crate::audio::devices::{self, AudioDevice};
 use crate::error::AppError;
 use crate::state::AppState;
 use crate::storage::config::ConfigStore;
+use crate::stt::dispatch;
 use crate::stt::model_manager;
 use crate::stt::types::TranscriptionResult;
 use crate::stt::whisper::WhisperEngine;
@@ -83,10 +84,5 @@ pub async fn stop_recording(
         capture.stop()?
     };
 
-    let whisper_guard = state.whisper.lock().map_err(|_| AppError::LockPoisoned)?;
-    let engine = whisper_guard
-        .as_ref()
-        .ok_or_else(|| AppError::Stt("model not loaded".to_string()))?;
-
-    engine.transcribe(&buffer.samples, None)
+    dispatch::transcribe(&*state, &buffer.samples, None).await
 }

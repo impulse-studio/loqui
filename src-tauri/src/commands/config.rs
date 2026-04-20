@@ -4,6 +4,19 @@ use crate::storage::config::ConfigStore;
 use crate::storage::transcripts::TranscriptStore;
 
 #[tauri::command]
+pub fn get_platform() -> &'static str {
+    if cfg!(target_os = "macos") {
+        "macos"
+    } else if cfg!(target_os = "windows") {
+        "windows"
+    } else if cfg!(target_os = "linux") {
+        "linux"
+    } else {
+        "unknown"
+    }
+}
+
+#[tauri::command]
 pub async fn get_config(state: tauri::State<'_, AppState>) -> Result<serde_json::Value, AppError> {
     let db = state.db.lock().map_err(|_| AppError::LockPoisoned)?;
     db.get_all_config().map_err(AppError::from)

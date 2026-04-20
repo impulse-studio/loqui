@@ -1,5 +1,18 @@
 use crate::error::AppError;
+use crate::storage::database::Database;
+use crate::storage::secrets::SecretStore;
 use std::time::Instant;
+
+/// Secret-store account for a given LLM provider (e.g. `"openai"` → `"llm.openai"`).
+pub fn secret_account(provider: &str) -> String {
+    format!("llm.{provider}")
+}
+
+/// Read the API key for an LLM provider from the encrypted secret store.
+/// Returns `Ok(None)` when no key is configured.
+pub fn load_api_key(db: &Database, provider: &str) -> Result<Option<String>, AppError> {
+    db.get_api_key(&secret_account(provider))
+}
 
 #[derive(serde::Serialize, Clone)]
 pub struct RemoteModelEntry {

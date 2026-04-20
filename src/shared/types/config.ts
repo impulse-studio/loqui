@@ -12,6 +12,13 @@ export type LlmProvider =
   | "google"
   | "custom";
 
+export type SttProvider =
+  | "local"
+  | "groq"
+  | "openai"
+  | "deepgram"
+  | "custom";
+
 export type WidgetPosition =
   | "bottom-left"
   | "bottom-right"
@@ -30,14 +37,14 @@ export interface AppConfig {
   defaultProfileId: string;
   sttModel: string;
   sttLanguage: string;
+  sttProvider: SttProvider;
+  sttRemoteModel: string;
+  sttCustomEndpoint: string;
   microphoneDevice: string;
   llmProvider: LlmProvider;
   llmApiKey: string;
   llmModel: string;
   llmEnabled: string;
-  llmApiKeyOpenai: string;
-  llmApiKeyAnthropic: string;
-  llmApiKeyGoogle: string;
   autoPaste: string;
   copyToClipboard: string;
   launchAtStartup: string;
@@ -54,6 +61,9 @@ export const DEFAULT_CONFIG: Partial<AppConfig> = {
   hotkey: "alt+space",
   sttModel: "whisper-base",
   sttLanguage: "auto",
+  sttProvider: "local",
+  sttRemoteModel: "",
+  sttCustomEndpoint: "",
   microphoneDevice: "default",
   llmProvider: "local",
   llmEnabled: "false",

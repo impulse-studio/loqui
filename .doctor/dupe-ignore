@@ -72,3 +72,25 @@ MAGIC:microphoneDevice
 
 # False positive: StepMicrophone uses Math.min for level clamping, not FFT bars
 HOOK:useFftBars/StepMicrophone
+
+# STT config keys — shared by picker + settings, only 2 call sites
+MAGIC:local
+MAGIC:sttProvider
+MAGIC:sttRemoteModel
+MAGIC:sttCustomEndpoint
+MAGIC:whisper-1
+
+# Status variant used across components (state machines, not a config key)
+MAGIC:error
+
+# Cross-feature: onboarding can't import from settings/ (import rules)
+HOOK:useSettingsConfig/StepWelcome
+
+# False positive: CloudProviderPicker uses String() for error formatting, not download events
+HOOK:useDownloadEvents/CloudProviderPicker
+
+# Footer-setting scaffolding pattern between onboarding step and settings modal
+BLOCK:StepWelcomeLocal/SpeechModelModal
+
+# Permission id discriminant — shared between config + component switch
+MAGIC:inputMonitoring

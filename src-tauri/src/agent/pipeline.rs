@@ -123,20 +123,11 @@ fn process_recording(app_handle: &AppHandle, context: RecordingContext) -> Resul
 
     let duration_secs = buffer.duration_secs();
 
-    // 2. Transcribe
+    // 2. Transcribe (dispatch to local Whisper or configured cloud provider)
     let text = {
-        let whisper_guard = state.whisper.lock().map_err(|_| AppError::LockPoisoned)?;
-        let engine = whisper_guard
-            .as_ref()
-            .ok_or_else(|| AppError::Stt("model not loaded".to_string()))?;
-
-        let language = {
-            let db = state.db.lock().map_err(|_| AppError::LockPoisoned)?;
-            db.get_config("sttLanguage").ok().flatten()
-        };
-        let lang_ref = language.as_deref().filter(|l| *l != "auto");
-
-        let result = engine.transcribe(&buffer.samples, lang_ref)?;
+        let rt = tokio::runtime::Runtime::new()
+            .map_err(|e| AppError::Stt(format!("tokio runtime init failed: {e}")))?;
+        let result = rt.block_on(crate::stt::dispatch::transcribe(&*state, &buffer.samples, None))?;
         result.text.trim().to_string()
     };
 
@@ -331,14 +322,20 @@ fn attempt_refactor(
     let ctx_size = profile.context_size as u32;
 
     if provider != "local" {
-        // Remote provider: read per-provider API key
-        let cap = provider.chars().next().map_or(String::new(), |c| {
-            c.to_uppercase().to_string() + &provider[1..]
-        });
-        let api_key_name = format!("llmApiKey{cap}");
+        // Remote provider: read per-provider API key from the encrypted secret store.
         let api_key = {
-            let db = state.db.lock().ok()?;
-            db.get_config(&api_key_name).ok().flatten().unwrap_or_default()
+            let db = match state.db.lock() {
+                Ok(db) => db,
+                Err(_) => {
+                    log::error!("Pipeline: db lock poisoned");
+                    return None;
+                }
+            };
+            crate::llm::remote::load_api_key(&db, provider)
+                .map_err(|e| log::error!("Pipeline: secret read failed for {provider}: {e}"))
+                .ok()
+                .flatten()
+                .unwrap_or_default()
         };
         if api_key.is_empty() {
             log::warn!("Pipeline: API key not set for provider {provider}");

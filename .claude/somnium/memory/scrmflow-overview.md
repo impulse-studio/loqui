@@ -1,16 +1,16 @@
 ---
 created_at: 2026-04-11T16:58:36.389157+00:00
-updated_at: 2026-04-11T17:26:00.157069+00:00
+updated_at: 2026-04-20T20:42:50.955127+00:00
 category: project_memory
 source: dream
-tags: ["project", "status", "phases"]
+tags: ["scrmflow", "architecture"]
 ---
 
 # ScrmFlow overview
 
-ScrmFlow is a local-first, privacy-focused speech-to-text desktop companion.
+ScrmFlow is a privacy-focused speech-to-text desktop companion supporting both local (on-device) and cloud transcription modes.
 
-**What it does:** Captures microphone audio and transcribes speech entirely on-device (no cloud APIs). Provides a floating overlay widget for real-time transcription and a full dashboard for managing transcripts and profiles.
+**What it does:** Captures microphone audio and transcribes speech. Supports fully local Whisper models (audio never leaves device) OR cloud STT providers (Groq whisper-large-v3-turbo, OpenAI, Deepgram, Custom OpenAI-compatible endpoints). Provides a floating overlay widget and a full dashboard.
 
 **Stack:** Tauri 2 (Rust backend) + React 19 + TypeScript + Tailwind v4 + Zustand + React Router v7. SQLite for local storage.
 
@@ -18,16 +18,23 @@ ScrmFlow is a local-first, privacy-focused speech-to-text desktop companion.
 - `index.html` → main dashboard (settings, transcripts, profiles)
 - `widget.html` → floating NSPanel overlay that works over fullscreen apps on macOS
 
-**Why:** Local-first means audio never leaves the machine — privacy by design.
+**Bundle ID:** `com.impulselab.loqui`
 
-**Phase status (as of 2026-04-11, verified against source):**
-- Phase 1 DONE: Scaffolding, SQLite, 11 commands, 13+ shared components, layout, routing
-- Phase 2 DONE: Whisper model manager, audio capture (cpal), hotkey handler, onboarding step flow
-- Phase 3 IN PROGRESS: Agent pipeline (state machine, app detection, clipboard paste, LLM step)
-- Phase 4 DONE: Widget (state rendering, FFT bars, animations)
-- Phase 5 DONE: Dashboard, stats, activity chart, transcripts page
-- Phase 6 DONE: Profiles page, system prompt presets, app mapping, LLM providers
-- Phase 7 DONE: Settings pages (general, speech, LLM, widget, data, about)
-- Phase 8 ~85% DONE:
-  - DONE: System tray icon + menu (`window/tray.rs`), launch at startup (tauri-plugin-autostart), real app icon (.icns/.ico/all sizes), NSPanel widget overlay
-  - REMAINING: Notification sounds on transcription complete, microphone permission denial UI/flow
+**API key storage:** Provider API keys (LLM + STT) stored in `secrets` SQLite table, AES-256-GCM encrypted. Master key file at `~/Library/Application Support/com.impulselab.loqui/master.key` (perms 0600, generated at first boot). NOT in OS keychain.
+
+**Key modules (as of 2026-04-20):**
+- `src-tauri/src/security/secrets.rs` — `MasterKey::load_or_create()`, `encrypt()`, `decrypt()`. Format: `hex(nonce || ciphertext)`
+- `src-tauri/src/storage/secrets.rs` — `SecretStore` trait, `secrets(account, value)` DB table
+- `src-tauri/src/stt/dispatch.rs` — routes transcription to local Whisper or remote based on `sttProvider` config
+- `src-tauri/src/stt/remote.rs` — async `remote_transcribe()` for cloud providers (multipart/form-data audio upload)
+- `src-tauri/src/commands/stt_cloud.rs` — IPC: `save_stt_api_key`, `has_stt_api_key`, `delete_stt_api_key`, `test_stt_provider`
+- `src-tauri/src/commands/llm_keys.rs` — IPC: same pattern for LLM keys
+- `src/shared/components/cloud-provider-picker/` — shared picker used in onboarding + settings
+
+**Onboarding step-welcome split (as of 2026-04-20):**
+- `step-welcome.tsx` — orchestrator (toggles local/cloud mode, default = local)
+- `step-welcome-local.tsx` — Whisper model cards UI
+- `step-welcome-cloud.tsx` — cloud provider picker UI
+- Both sub-steps have a link to switch to the other mode
+
+**Onboarding step order:** Permissions (0) → Model (1) → Microphone (2) → Hotkey (3) → Test (4) → Done (5)

@@ -7,6 +7,7 @@ mod hotkey;
 pub mod llm;
 mod model_manager;
 mod paste;
+mod security;
 mod stt;
 mod state;
 mod storage;
@@ -68,7 +69,9 @@ pub fn run() {
 
     #[cfg(target_os = "macos")]
     {
-        builder = builder.plugin(tauri_nspanel::init());
+        builder = builder
+            .plugin(tauri_nspanel::init())
+            .plugin(tauri_plugin_macos_permissions::init());
     }
 
     builder
@@ -85,6 +88,7 @@ pub fn run() {
             llm_download_cancel: Mutex::new(None),
         })
         .invoke_handler(tauri::generate_handler![
+            commands::config::get_platform,
             commands::config::get_config,
             commands::config::set_config,
             commands::config::clear_all_data,
@@ -116,6 +120,13 @@ pub fn run() {
             commands::llm::get_detected_apps,
             commands::llm::get_llm_api_key_status,
             commands::llm::fetch_remote_models,
+            commands::llm_keys::save_llm_api_key,
+            commands::llm_keys::has_llm_api_key,
+            commands::llm_keys::delete_llm_api_key,
+            commands::stt_cloud::save_stt_api_key,
+            commands::stt_cloud::has_stt_api_key,
+            commands::stt_cloud::delete_stt_api_key,
+            commands::stt_cloud::test_stt_provider,
             commands::config::export_transcripts,
             commands::widget::apply_widget_settings,
         ])
@@ -232,3 +243,4 @@ pub fn run() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+

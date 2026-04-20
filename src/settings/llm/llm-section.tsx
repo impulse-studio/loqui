@@ -1,26 +1,43 @@
-import { useCallback, useState } from "react";
-import { setConfig } from "../../shared/lib/tauri-commands";
-import useSettingsConfig from "../use-settings-config";
+import { useCallback, useEffect, useState } from "react";
+import {
+  deleteLlmApiKey,
+  hasLlmApiKey,
+  saveLlmApiKey,
+} from "../../shared/lib/tauri-commands";
 import LlmLocalSettings from "./llm-local-settings";
 import LlmRemoteSettings from "./llm-remote-settings";
 import remoteProviderConfig from "./remote-provider-config";
 
 export default function LlmSection() {
   const [loadedId, setLoadedId] = useState<string | null>(null);
-  const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
+  const [keyStatus, setKeyStatus] = useState<Record<string, boolean>>({});
 
-  useSettingsConfig((cfg) => {
-    setApiKeys({
-      llmApiKeyOpenai: cfg.llmApiKeyOpenai ?? "",
-      llmApiKeyAnthropic: cfg.llmApiKeyAnthropic ?? "",
-      llmApiKeyGoogle: cfg.llmApiKeyGoogle ?? "",
-    });
-  });
+  const refreshStatus = useCallback(async () => {
+    const entries = await Promise.all(
+      remoteProviderConfig.map(async (p) => [p.id, await hasLlmApiKey(p.id)] as const),
+    );
+    setKeyStatus(Object.fromEntries(entries));
+  }, []);
 
-  function handleApiKeyChange(configKey: string, value: string) {
-    setApiKeys((prev) => ({ ...prev, [configKey]: value }));
-    setConfig(configKey, value);
-  }
+  useEffect(() => {
+    refreshStatus().catch(console.error);
+  }, [refreshStatus]);
+
+  const handleSave = useCallback(
+    async (providerId: string, key: string) => {
+      await saveLlmApiKey(providerId, key);
+      await refreshStatus();
+    },
+    [refreshStatus],
+  );
+
+  const handleRemove = useCallback(
+    async (providerId: string) => {
+      await deleteLlmApiKey(providerId);
+      await refreshStatus();
+    },
+    [refreshStatus],
+  );
 
   const handleModelLoaded = useCallback((modelId: string) => {
     setLoadedId(modelId);
@@ -36,9 +53,10 @@ export default function LlmSection() {
         <LlmRemoteSettings
           key={provider.id}
           name={provider.name}
-          apiKey={apiKeys[provider.configKey] ?? ""}
           placeholder={provider.placeholder}
-          onApiKeyChange={(value) => handleApiKeyChange(provider.configKey, value)}
+          isSet={keyStatus[provider.id] ?? false}
+          onSave={(key) => handleSave(provider.id, key)}
+          onRemove={() => handleRemove(provider.id)}
         />
       ))}
     </section>

@@ -21,6 +21,7 @@
     "clipboard-manager:allow-read-text",
     "autostart:default",
     "shell:default",
-    "dialog:default"
+    "dialog:default",
+    "macos-permissions:default"
   ]
 }

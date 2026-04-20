@@ -14,9 +14,16 @@ interface SelectProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  fullWidth?: boolean;
 }
 
-export default function Select({ options, value, onChange, placeholder }: SelectProps) {
+export default function Select({
+  options,
+  value,
+  onChange,
+  placeholder,
+  fullWidth = false,
+}: SelectProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -35,27 +42,35 @@ export default function Select({ options, value, onChange, placeholder }: Select
   }, [open]);
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className={cn("relative", fullWidth && "w-full")}>
       <button
         type="button"
         onClick={() => setOpen(!open)}
         className={cn(
           "flex items-center gap-2 bg-bg-secondary border border-border rounded-lg px-3 py-1.5 text-sm text-text-primary transition-colors hover:border-text-tertiary",
+          fullWidth && "w-full justify-between h-9",
           open && "border-accent ring-2 ring-accent/20",
         )}
       >
-        <span>{selected?.label ?? placeholder ?? "Select..."}</span>
+        <span className={cn(fullWidth && "truncate")}>
+          {selected?.label ?? placeholder ?? "Select..."}
+        </span>
         <ChevronDown
           size={14}
           className={cn(
-            "text-text-tertiary transition-transform",
+            "text-text-tertiary transition-transform shrink-0",
             open && "rotate-180",
           )}
         />
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1 z-50 min-w-[180px] bg-bg-card rounded-lg border border-border shadow-[0_4px_24px_rgba(0,0,0,0.08)] p-1">
+        <div
+          className={cn(
+            "absolute top-full mt-1 z-50 bg-bg-card rounded-lg border border-border shadow-[0_4px_24px_rgba(0,0,0,0.08)] p-1",
+            fullWidth ? "left-0 right-0" : "right-0 min-w-[180px]",
+          )}
+        >
           {options.map((opt) => (
             <button
               key={opt.value}

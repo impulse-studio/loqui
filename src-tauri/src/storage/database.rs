@@ -4,21 +4,26 @@ use std::path::PathBuf;
 
 use super::config::ConfigStore;
 use super::profiles::{ProfileRow, ProfileStore};
+use super::secrets::SecretStore;
 use super::transcripts::{ActivityRow, TranscriptRow, TranscriptStore};
+use crate::error::AppError;
+use crate::security::secrets::{self, MasterKey};
 
 pub struct Database {
     conn: Connection,
+    master_key: MasterKey,
 }
 
 impl Database {
-    pub fn new() -> Result<Self> {
+    pub fn new() -> std::result::Result<Self, AppError> {
         let db_path = Self::db_path();
         if let Some(parent) = db_path.parent() {
             std::fs::create_dir_all(parent).ok();
         }
         let conn = Connection::open(&db_path)?;
         conn.execute_batch("PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;")?;
-        Ok(Self { conn })
+        let master_key = MasterKey::load_or_create()?;
+        Ok(Self { conn, master_key })
     }
 
     fn db_path() -> PathBuf {
@@ -112,6 +117,17 @@ impl Database {
                  ALTER TABLE transcripts ADD COLUMN llm_cost REAL NOT NULL DEFAULT 0;
                  INSERT INTO app_config (key, value) VALUES ('schema_version', '4')
                     ON CONFLICT(key) DO UPDATE SET value = '4';",
+            )?;
+        }
+
+        if schema_version < 5 {
+            self.conn.execute_batch(
+                "CREATE TABLE IF NOT EXISTS secrets (
+                     account TEXT PRIMARY KEY,
+                     value TEXT NOT NULL
+                 );
+                 INSERT INTO app_config (key, value) VALUES ('schema_version', '5')
+                    ON CONFLICT(key) DO UPDATE SET value = '5';",
             )?;
         }
 
@@ -385,5 +401,44 @@ impl Database {
             "DELETE FROM transcripts;
              DELETE FROM app_config WHERE key != 'onboardingComplete';",
         )
+    }
+}
+
+impl SecretStore for Database {
+    fn save_api_key(&self, account: &str, value: &str) -> std::result::Result<(), AppError> {
+        let encoded = secrets::encrypt(&self.master_key, value.as_bytes())?;
+        self.conn.execute(
+            "INSERT INTO secrets (account, value) VALUES (?1, ?2)
+             ON CONFLICT(account) DO UPDATE SET value = excluded.value",
+            [account, &encoded],
+        )?;
+        Ok(())
+    }
+
+    fn get_api_key(&self, account: &str) -> std::result::Result<Option<String>, AppError> {
+        let mut stmt = self
+            .conn
+            .prepare("SELECT value FROM secrets WHERE account = ?1")?;
+        let mut rows = stmt.query_map([account], |row| row.get::<_, String>(0))?;
+        let Some(encoded) = rows.next().transpose()? else {
+            return Ok(None);
+        };
+        let plaintext = secrets::decrypt(&self.master_key, &encoded)?;
+        let value = String::from_utf8(plaintext)
+            .map_err(|e| AppError::Secret(format!("invalid utf-8 in stored secret: {e}")))?;
+        Ok(Some(value))
+    }
+
+    fn delete_api_key(&self, account: &str) -> std::result::Result<(), AppError> {
+        self.conn
+            .execute("DELETE FROM secrets WHERE account = ?1", [account])?;
+        Ok(())
+    }
+
+    fn has_api_key(&self, account: &str) -> std::result::Result<bool, AppError> {
+        match self.get_api_key(account)? {
+            Some(v) => Ok(!v.is_empty()),
+            None => Ok(false),
+        }
     }
 }

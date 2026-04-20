@@ -1,25 +1,40 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import cn from "../shared/lib/utils/cn";
-import stepRegistry, { type FooterConfig } from "./step-registry";
+import stepRegistry, { type FooterConfig, type StepEntry } from "./step-registry";
+import permissionsConfig from "./steps/permissions-config";
 
 interface OnboardingLayoutProps {
   onComplete: () => void;
 }
 
 export default function OnboardingLayout({ onComplete }: OnboardingLayoutProps) {
+  const [steps, setSteps] = useState<StepEntry[] | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [footer, setFooterState] = useState<FooterConfig | null>(null);
 
-  const isLastStep = currentStep === stepRegistry.length - 1;
-  const entry = stepRegistry[currentStep];
-  const StepComponent = entry.component;
+  useEffect(() => {
+    Promise.all(permissionsConfig.map((p) => p.check()))
+      .then((results) => {
+        const allGranted = results.every(Boolean);
+        setSteps(
+          allGranted
+            ? stepRegistry.filter((s) => s.label !== "Permissions")
+            : stepRegistry,
+        );
+      })
+      .catch((e) => {
+        console.error("Permission precheck failed:", e);
+        setSteps(stepRegistry);
+      });
+  }, []);
 
   const goNext = useCallback(() => {
-    if (!isLastStep) {
+    if (!steps) return;
+    if (currentStep < steps.length - 1) {
       setFooterState(null);
       setCurrentStep((s) => s + 1);
     }
-  }, [isLastStep]);
+  }, [currentStep, steps]);
 
   const setFooter = useCallback((config: FooterConfig | null) => {
     setFooterState(config);
@@ -31,6 +46,17 @@ export default function OnboardingLayout({ onComplete }: OnboardingLayoutProps) 
       setCurrentStep((s) => s - 1);
     }
   }
+
+  if (!steps) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-bg-primary text-sm text-text-tertiary">
+        Loading...
+      </div>
+    );
+  }
+
+  const entry = steps[currentStep];
+  const StepComponent = entry.component;
 
   return (
     <div className="flex flex-col h-screen bg-bg-primary">
@@ -44,7 +70,7 @@ export default function OnboardingLayout({ onComplete }: OnboardingLayoutProps) 
         </div>
 
         <div className="flex items-center justify-center gap-2">
-          {stepRegistry.map((step, i) => (
+          {steps.map((step, i) => (
             <div key={step.label} className="flex items-center gap-2">
               <div
                 className={cn(
@@ -64,7 +90,7 @@ export default function OnboardingLayout({ onComplete }: OnboardingLayoutProps) 
               >
                 {step.label}
               </span>
-              {i < stepRegistry.length - 1 && (
+              {i < steps.length - 1 && (
                 <div className="w-8 h-px bg-border" />
               )}
             </div>

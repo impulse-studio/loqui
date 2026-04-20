@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import StepPermissions from "./steps/step-permissions";
 import StepWelcome from "./steps/step-welcome";
 import StepMicrophone from "./steps/step-microphone";
 import StepHotkey from "./steps/step-hotkey";
@@ -26,6 +27,7 @@ export interface StepEntry {
 }
 
 const stepRegistry: StepEntry[] = [
+  { label: "Permissions", component: StepPermissions },
   { label: "Model", component: StepWelcome },
   { label: "Microphone", component: StepMicrophone },
   { label: "Hotkey", component: StepHotkey },
