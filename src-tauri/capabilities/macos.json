@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicholasrice/tauri/feat/schema-generation/crates/tauri-utils/schema.json",
+  "identifier": "macos",
+  "description": "macOS-only capabilities for Loqui",
+  "platforms": ["macOS"],
+  "windows": ["main", "widget"],
+  "permissions": [
+    "macos-permissions:default"
+  ]
+}
