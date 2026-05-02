@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+set -e
+
+echo "→ doctor"
+bash .doctor/run.sh src
+
+echo "→ tsc"
+npx tsc --noEmit
+
+echo "→ cargo check"
+(cd src-tauri && cargo check --quiet)
+
+echo "→ cargo clippy"
+(cd src-tauri && cargo clippy --no-deps --quiet)
+
+echo "✓ pre-push checks passed"
