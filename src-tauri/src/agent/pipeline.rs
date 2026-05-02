@@ -18,12 +18,23 @@ pub fn on_press(app_handle: &AppHandle) {
     log::info!("Pipeline: on_press triggered");
     let state = app_handle.state::<AppState>();
 
-    // Guard: model must be loaded
+    // Guard: in local mode the model must be loaded — otherwise the
+    // user starts a recording they cannot transcribe. In cloud mode the
+    // dispatch routes to a remote provider, so no local engine is required.
     {
-        let guard = state.whisper.lock().unwrap_or_else(|e| e.into_inner());
-        if guard.is_none() {
-            log::warn!("Pipeline: skipping — whisper model not loaded");
-            return;
+        let provider = {
+            let db = state.db.lock().unwrap_or_else(|e| e.into_inner());
+            db.get_config("sttProvider")
+                .ok()
+                .flatten()
+                .unwrap_or_else(|| "local".to_string())
+        };
+        if provider.is_empty() || provider == "local" {
+            let guard = state.whisper.lock().unwrap_or_else(|e| e.into_inner());
+            if guard.is_none() {
+                log::warn!("Pipeline: skipping — whisper model not loaded");
+                return;
+            }
         }
     }
 

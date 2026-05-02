@@ -46,6 +46,25 @@ pub async fn load_stt_model(
 }
 
 #[tauri::command]
+pub async fn unload_stt_model(
+    state: tauri::State<'_, AppState>,
+) -> Result<(), AppError> {
+    {
+        let mut guard = state.whisper.lock().map_err(|_| AppError::LockPoisoned)?;
+        *guard = None;
+    }
+    {
+        let mut guard = state
+            .loaded_model_id
+            .lock()
+            .map_err(|_| AppError::LockPoisoned)?;
+        *guard = None;
+    }
+    log::info!("STT model unloaded");
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn start_recording(
     state: tauri::State<'_, AppState>,
     app_handle: tauri::AppHandle,

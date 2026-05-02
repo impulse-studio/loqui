@@ -99,6 +99,10 @@ export async function loadSttModel(modelId: string): Promise<void> {
   return invoke("load_stt_model", { modelId });
 }
 
+export async function unloadSttModel(): Promise<void> {
+  return invoke("unload_stt_model");
+}
+
 export async function startRecording(): Promise<void> {
   return invoke("start_recording");
 }

@@ -5,6 +5,7 @@ import { DEFAULT_CONFIG, type SttProvider } from "../../shared/types/config";
 import {
   getAudioDevices,
   getModels,
+  loadSttModel,
   setConfig,
   type AudioDevice,
 } from "../../shared/lib/tauri-commands";
@@ -77,7 +78,12 @@ export default function SpeechSection() {
     setProvider("local");
     setRemoteModel("");
     setCustomEndpoint("");
-  }, []);
+    // Re-load the local Whisper model — it was unloaded when the user
+    // switched to a cloud provider, so transcription would otherwise fail.
+    if (modelId) {
+      loadSttModel(modelId).catch(console.error);
+    }
+  }, [modelId]);
 
   return (
     <section className="mb-8">

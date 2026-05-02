@@ -48,10 +48,17 @@ function Widget() {
     getCurrentWindow().startDragging();
   }, []);
 
-  // Safety net: request model-loaded re-emit
+  // Safety net: request model-loaded re-emit. With a cloud provider,
+  // skip the load entirely — otherwise the backend would pull a 1-2GB
+  // local model into RAM that no transcription will ever use.
   useEffect(() => {
     getConfig()
       .then((config) => {
+        const provider = config.sttProvider || "local";
+        if (provider !== "local" && provider !== "") {
+          setState("idle");
+          return;
+        }
         const modelId = config.sttModel || DEFAULT_CONFIG.sttModel!;
         return loadSttModel(modelId);
       })

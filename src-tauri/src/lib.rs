@@ -108,6 +108,7 @@ pub fn run() {
             commands::hotkey::set_hotkey,
             commands::audio::get_audio_devices,
             commands::audio::load_stt_model,
+            commands::audio::unload_stt_model,
             commands::audio::start_recording,
             commands::audio::stop_recording,
             commands::llm::get_llm_models,
@@ -194,14 +195,31 @@ pub fn run() {
                         let _ = widget.show();
                     }
 
-                    // Load STT model in background
-                    let model_id = {
+                    // Load STT model in background — but only if the user is on
+                    // the local provider. With a cloud provider configured, the
+                    // local Whisper model would otherwise hold 16-20GB of RAM
+                    // that the app never uses.
+                    let (provider, model_id) = {
                         let db = state.db.lock().unwrap();
-                        db.get_config("sttModel")
+                        let provider = db
+                            .get_config("sttProvider")
                             .ok()
                             .flatten()
-                            .unwrap_or_else(|| "whisper-base".to_string())
+                            .unwrap_or_else(|| "local".to_string());
+                        let model_id = db
+                            .get_config("sttModel")
+                            .ok()
+                            .flatten()
+                            .unwrap_or_else(|| "whisper-base".to_string());
+                        (provider, model_id)
                     };
+
+                    if !provider.is_empty() && provider != "local" {
+                        log::info!(
+                            "Cloud STT provider '{provider}' configured — skipping local model auto-load"
+                        );
+                        return Ok(());
+                    }
 
                     log::info!("Auto-loading STT model: {model_id}");
                     let handle = app.handle().clone();

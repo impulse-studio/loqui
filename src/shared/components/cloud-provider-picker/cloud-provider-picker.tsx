@@ -7,6 +7,7 @@ import {
   saveSttApiKey,
   setConfig,
   testSttProvider,
+  unloadSttModel,
 } from "../../lib/tauri-commands";
 import type { SttProvider } from "../../types/config";
 import remoteProviderConfig, {
@@ -112,6 +113,10 @@ export default function CloudProviderPicker({
         provider.needsCustomEndpoint ? customEndpoint.trim() : "",
       );
       await setConfig("sttProvider", providerId);
+      // Free the local Whisper model — it would otherwise stay resident
+      // (16-20GB of RAM) for the rest of the session even though no
+      // transcription will route to it.
+      await unloadSttModel().catch(console.error);
       setApiKey("");
       await refreshKeyStatus(providerId);
       setStatus({ kind: "ok" });
