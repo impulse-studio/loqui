@@ -102,3 +102,6 @@ MAGIC:idle
 # which captures a new hotkey combo, and useUpdateCheck which is unrelated)
 HOOK:useHotkeyRecorder/StepTest
 HOOK:useUpdateCheck/StepTest
+
+# handleKeyDown/handleKeyUp in StepTest are intentionally symmetric (add vs delete)
+BLOCK:handleKeyDown/handleKeyUp
