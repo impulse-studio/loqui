@@ -63,7 +63,6 @@ impl AudioCapture {
             let stream_config = config.config();
             let sample_format = config.sample_format();
 
-            let _ = init_tx.send(Ok((device_sample_rate, device_channels)));
             let err_fn = |err| {
                 log::error!("audio stream error: {err}");
             };
@@ -103,7 +102,7 @@ impl AudioCapture {
                 _ => {
                     let msg = format!("unsupported sample format: {sample_format:?}");
                     log::error!("{msg}");
-                    let _ = error_handle.emit("audio-error", serde_json::json!({ "error": msg }));
+                    let _ = init_tx.send(Err(AppError::Audio(msg)));
                     return;
                 }
             };
@@ -113,7 +112,7 @@ impl AudioCapture {
                 Err(e) => {
                     let msg = format!("failed to build audio stream: {e}");
                     log::error!("{msg}");
-                    let _ = error_handle.emit("audio-error", serde_json::json!({ "error": msg }));
+                    let _ = init_tx.send(Err(AppError::Audio(msg)));
                     return;
                 }
             };
@@ -121,9 +120,12 @@ impl AudioCapture {
             if let Err(e) = stream.play() {
                 let msg = format!("failed to start audio stream: {e}");
                 log::error!("{msg}");
-                let _ = error_handle.emit("audio-error", serde_json::json!({ "error": msg }));
+                let _ = init_tx.send(Err(AppError::Audio(msg)));
                 return;
             }
+
+            // Stream is live — signal success to the calling thread
+            let _ = init_tx.send(Ok((device_sample_rate, device_channels)));
 
             // Block until stop_flag is set
             while !stop_clone.load(Ordering::Relaxed) {

@@ -80,15 +80,16 @@ export default function StepTest({ goNext, setFooter }: StepComponentProps) {
       pressedKeys.current.delete(eventKeyName(e));
       const stillActive = [...hotkeySet].every((k) => pressedKeys.current.has(k));
       if (!stillActive && isRecordingRef.current) {
-        isRecordingRef.current = false;
         setStatus("processing");
         try {
           const result = await stopRecording();
+          isRecordingRef.current = false;
           const clean = result.text?.trim().replace(/^\[BLANK_AUDIO\]$/i, "") ?? "";
           if (clean) setText((prev) => (prev ? prev + "\n" + clean : clean));
           setStatus("idle");
         } catch (err) {
           console.error(err);
+          isRecordingRef.current = false;
           setStatus("error");
           setTimeout(() => setStatus("idle"), 2000);
         }
