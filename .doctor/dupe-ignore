@@ -94,3 +94,11 @@ BLOCK:StepWelcomeLocal/SpeechModelModal
 
 # Permission id discriminant — shared between config + component switch
 MAGIC:inputMonitoring
+
+# AgentState literal — typed enum value shared across widget and onboarding
+MAGIC:idle
+
+# StepTest keyboard handler triggers recording (different domain from useHotkeyRecorder
+# which captures a new hotkey combo, and useUpdateCheck which is unrelated)
+HOOK:StepTest/useHotkeyRecorder
+HOOK:StepTest/useUpdateCheck
