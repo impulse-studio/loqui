@@ -1,14 +1,7 @@
-export default function eventKeyName(e: KeyboardEvent): string {
-  switch (e.key) {
-    case " ": return "space";
-    case "Control": return "ctrl";
-    case "Alt": return "alt";
-    case "Shift": return "shift";
-    case "Meta": return "super";
-    case "ArrowRight": return "right";
-    case "ArrowLeft": return "left";
-    case "ArrowUp": return "up";
-    case "ArrowDown": return "down";
-    default: return e.key.toLowerCase();
-  }
+import keyEventToShortcut from "../../shared/lib/hotkey/key-event-to-shortcut";
+
+// Use the same e.code-based mapping as the hotkey recorder so names match
+// the stored hotkey format (e.g. "minus" not "-", "plus" not "=").
+export default function eventKeyName(e: KeyboardEvent): string | null {
+  return keyEventToShortcut(e.code);
 }

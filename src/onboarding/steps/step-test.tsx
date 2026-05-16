@@ -55,13 +55,15 @@ export default function StepTest({ goNext, setFooter }: StepComponentProps) {
   // Browser-level keyboard handler — works even when app has focus
   useEffect(() => {
     if (!modelReady) return;
+    pressedKeys.current.clear();
 
     const hotkeySet = new Set(
       hotkey.toLowerCase().split("+").map((k) => k.trim()).filter(Boolean)
     );
 
     const handleKeyDown = async (e: KeyboardEvent) => {
-      pressedKeys.current.add(eventKeyName(e));
+      const key = eventKeyName(e);
+      if (key) pressedKeys.current.add(key);
       const allPressed = [...hotkeySet].every((k) => pressedKeys.current.has(k));
       if (allPressed && !isRecordingRef.current) {
         isRecordingRef.current = true;
@@ -77,7 +79,8 @@ export default function StepTest({ goNext, setFooter }: StepComponentProps) {
     };
 
     const handleKeyUp = async (e: KeyboardEvent) => {
-      pressedKeys.current.delete(eventKeyName(e));
+      const key = eventKeyName(e);
+      if (key) pressedKeys.current.delete(key);
       const stillActive = [...hotkeySet].every((k) => pressedKeys.current.has(k));
       if (!stillActive && isRecordingRef.current) {
         setStatus("processing");

@@ -29,7 +29,6 @@ impl AudioCapture {
 
         let samples_clone = samples.clone();
         let app_handle_clone = app_handle.clone();
-        let error_handle = app_handle.clone();
         let stop_clone = stop_flag.clone();
         let level_state: Arc<Mutex<LevelState>> =
             Arc::new(Mutex::new(LevelState { last_emit: Instant::now(), peak_rms: 0.0 }));
