@@ -24,15 +24,6 @@ impl AudioCapture {
         app_handle: &AppHandle<R>,
         device_name: &str,
     ) -> Result<Self, AppError> {
-        let device = devices::find_device_by_name(device_name)?;
-
-        let config = device
-            .default_input_config()
-            .map_err(|e| AppError::Audio(format!("failed to get input config: {e}")))?;
-
-        let device_sample_rate = config.sample_rate().0;
-        let device_channels = config.channels();
-
         let samples: Arc<Mutex<Vec<f32>>> = Arc::new(Mutex::new(Vec::new()));
         let stop_flag = Arc::new(AtomicBool::new(false));
 
@@ -42,12 +33,37 @@ impl AudioCapture {
         let stop_clone = stop_flag.clone();
         let level_state: Arc<Mutex<LevelState>> =
             Arc::new(Mutex::new(LevelState { last_emit: Instant::now(), peak_rms: 0.0 }));
+        let device_name = device_name.to_string();
 
-        let stream_config = config.config();
-        let sample_format = config.sample_format();
+        // On Windows, WASAPI COM objects must be created and used on the same thread.
+        // Device setup happens inside the spawned thread; init result is sent back via channel.
+        let (init_tx, init_rx) = std::sync::mpsc::channel::<Result<(u32, u16), AppError>>();
 
-        // Spawn a dedicated thread that owns the cpal Stream
         std::thread::spawn(move || {
+            let device = match devices::find_device_by_name(&device_name) {
+                Ok(d) => d,
+                Err(e) => {
+                    let _ = init_tx.send(Err(e));
+                    return;
+                }
+            };
+
+            let config = match device.default_input_config() {
+                Ok(c) => c,
+                Err(e) => {
+                    let _ = init_tx.send(Err(AppError::Audio(
+                        format!("failed to get input config: {e}"),
+                    )));
+                    return;
+                }
+            };
+
+            let device_sample_rate = config.sample_rate().0;
+            let device_channels = config.channels();
+            let stream_config = config.config();
+            let sample_format = config.sample_format();
+
+            let _ = init_tx.send(Ok((device_sample_rate, device_channels)));
             let err_fn = |err| {
                 log::error!("audio stream error: {err}");
             };
@@ -116,6 +132,16 @@ impl AudioCapture {
 
             // Stream is dropped here, stopping the recording
         });
+
+        let (device_sample_rate, device_channels) = match init_rx.recv() {
+            Ok(Ok(info)) => info,
+            Ok(Err(e)) => return Err(e),
+            Err(_) => {
+                return Err(AppError::Audio(
+                    "audio thread failed to initialize".to_string(),
+                ))
+            }
+        };
 
         Ok(Self {
             samples,

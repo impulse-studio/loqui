@@ -35,6 +35,7 @@ export default function StepWelcomeLocal({
       if (!advancedRef.current) {
         advancedRef.current = true;
         updateConfig("sttModel", selectedId);
+        setConfig("sttModel", selectedId).catch(console.error);
         setConfig("sttProvider", "local").catch(console.error);
         loadSttModel(selectedId).catch(console.error);
         goNextRef.current();
@@ -71,6 +72,7 @@ export default function StepWelcomeLocal({
         label: "Continue",
         onClick: () => {
           updateConfig("sttModel", selectedId);
+          setConfig("sttModel", selectedId).catch(console.error);
           setConfig("sttProvider", "local").catch(console.error);
           loadSttModel(selectedId).catch(console.error);
           goNextRef.current();
