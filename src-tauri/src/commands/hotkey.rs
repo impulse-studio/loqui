@@ -15,9 +15,12 @@ pub async fn set_hotkey(
         *target = new_keys;
     }
 
-    // Persist to config
-    let db = state.db.lock().map_err(|_| AppError::LockPoisoned)?;
-    db.set_config("hotkey", &hotkey)?;
+    // Only persist non-empty hotkeys — empty string is a temporary in-memory
+    // pause (used by the test step) and must not overwrite the saved shortcut.
+    if !hotkey.is_empty() {
+        let db = state.db.lock().map_err(|_| AppError::LockPoisoned)?;
+        db.set_config("hotkey", &hotkey)?;
+    }
 
     Ok(())
 }

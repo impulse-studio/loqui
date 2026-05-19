@@ -22,11 +22,11 @@ pub fn on_press(app_handle: &AppHandle) {
     // routes elsewhere, so no local engine is required.
     let local_mode = {
         let db = state.db.lock().unwrap_or_else(|e| e.into_inner());
-        let p = db.get_config("sttProvider").ok().flatten().unwrap_or_default();
-        p.is_empty() || p == "local"
+        matches!(db.get_config("sttProvider").ok().flatten().unwrap_or_default().as_str(), "" | "local")
     };
     if local_mode && state.whisper.lock().unwrap_or_else(|e| e.into_inner()).is_none() {
         log::warn!("Pipeline: skipping — whisper model not loaded");
+        let _ = emit_state(app_handle, "error");
         return;
     }
 

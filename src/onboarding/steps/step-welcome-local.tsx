@@ -35,9 +35,13 @@ export default function StepWelcomeLocal({
       if (!advancedRef.current) {
         advancedRef.current = true;
         updateConfig("sttModel", selectedId);
-        setConfig("sttProvider", "local").catch(console.error);
-        loadSttModel(selectedId).catch(console.error);
-        goNextRef.current();
+        Promise.all([
+          setConfig("sttModel", selectedId),
+          setConfig("sttProvider", "local"),
+          loadSttModel(selectedId),
+        ])
+          .then(() => goNextRef.current())
+          .catch(console.error);
       }
     }).catch(console.error);
   }, [selectedId, updateConfig]);
@@ -71,9 +75,13 @@ export default function StepWelcomeLocal({
         label: "Continue",
         onClick: () => {
           updateConfig("sttModel", selectedId);
-          setConfig("sttProvider", "local").catch(console.error);
-          loadSttModel(selectedId).catch(console.error);
-          goNextRef.current();
+          Promise.all([
+            setConfig("sttModel", selectedId),
+            setConfig("sttProvider", "local"),
+            loadSttModel(selectedId),
+          ])
+            .then(() => goNextRef.current())
+            .catch(console.error);
         },
       });
     } else {
