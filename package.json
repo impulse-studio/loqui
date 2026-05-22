@@ -35,6 +35,6 @@
     "husky": "^9.1.7",
     "tailwindcss": "^4.0.0",
     "typescript": "~5.7.0",
-    "vite": "^6.0.0"
+    "vite": "^6.4.2"
   }
 }
