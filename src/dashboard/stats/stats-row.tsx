@@ -26,7 +26,7 @@ export default function StatsRow() {
     <div className="grid grid-cols-4 gap-4 mb-8">
       {items.map((stat) => (
         <Card key={stat.label} className="px-5 py-4">
-          <div className="text-2xl font-bold text-text-primary">
+          <div className="text-2xl font-bold text-text-primary tabular-nums">
             {stat.value}
           </div>
           <div className="text-xs text-text-secondary mt-1">{stat.label}</div>

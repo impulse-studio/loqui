@@ -485,7 +485,41 @@ fn hot_swap_llm(app_handle: &AppHandle, model_id: &str) -> Result<(), AppError> 
 }
 
 fn emit_state(app_handle: &AppHandle, state: &str) -> Result<(), tauri::Error> {
+    // The widget must be visible while it is actively reflecting a recording,
+    // even when the user has hidden it. We force it on when recording begins
+    // and restore the configured visibility once we settle back to idle.
+    match state {
+        "recording" => show_widget(app_handle),
+        "idle" => restore_widget_visibility(app_handle),
+        _ => {}
+    }
     app_handle.emit("agent-state-changed", serde_json::json!({ "state": state }))
+}
+
+/// Force the widget window visible (used when recording starts).
+fn show_widget(app_handle: &AppHandle) {
+    if let Some(widget) = app_handle.get_webview_window("widget") {
+        let _ = widget.show();
+    }
+}
+
+/// Restore the widget to the user's configured visibility. Called when the
+/// pipeline returns to idle, so a hidden widget that we surfaced for recording
+/// gets hidden again.
+fn restore_widget_visibility(app_handle: &AppHandle) {
+    let state = app_handle.state::<AppState>();
+    let visible = state
+        .db
+        .lock()
+        .ok()
+        .and_then(|db| db.get_config("widgetVisible").ok().flatten())
+        .map_or(true, |v| v == "true");
+
+    if !visible {
+        if let Some(widget) = app_handle.get_webview_window("widget") {
+            let _ = widget.hide();
+        }
+    }
 }
 
 fn parse_retention_bytes(value: &str) -> Option<i64> {

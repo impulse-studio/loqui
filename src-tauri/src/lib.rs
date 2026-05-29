@@ -176,7 +176,7 @@ pub fn run() {
 
                 if onboarding_done {
                     if let Some(widget) = app.get_webview_window("widget") {
-                        let (position, size) = {
+                        let (position, size, visible) = {
                             let db = state.db.lock().unwrap();
                             let pos = db
                                 .get_config("widgetPosition")
@@ -188,11 +188,20 @@ pub fn run() {
                                 .ok()
                                 .flatten()
                                 .unwrap_or_else(|| "medium".to_string());
-                            (pos, sz)
+                            let vis = db
+                                .get_config("widgetVisible")
+                                .ok()
+                                .flatten()
+                                .map_or(true, |v| v == "true");
+                            (pos, sz, vis)
                         };
                         let _ =
                             window::widget::apply_position_and_size(&widget, &position, &size);
-                        let _ = widget.show();
+                        // Respect the user's hide preference at startup. When hidden,
+                        // the pipeline still surfaces the widget during recording.
+                        if visible {
+                            let _ = widget.show();
+                        }
                     }
 
                     // Load STT model in background — but only if the user is on

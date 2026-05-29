@@ -47,7 +47,9 @@ export default function Select({
         type="button"
         onClick={() => setOpen(!open)}
         className={cn(
-          "flex items-center gap-2 bg-bg-secondary border border-border rounded-lg px-3 py-1.5 text-sm text-text-primary transition-colors hover:border-text-tertiary",
+          "flex items-center gap-2 bg-bg-secondary border border-border rounded-lg px-3 py-1.5 text-sm text-text-primary",
+          "transition-colors duration-150 ease-out motion-reduce:transition-none hover:border-text-tertiary",
+          "focus-visible:outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/20",
           fullWidth && "w-full justify-between h-9",
           open && "border-accent ring-2 ring-accent/20",
         )}
@@ -67,8 +69,8 @@ export default function Select({
       {open && (
         <div
           className={cn(
-            "absolute top-full mt-1 z-50 bg-bg-card rounded-lg border border-border shadow-[0_4px_24px_rgba(0,0,0,0.08)] p-1",
-            fullWidth ? "left-0 right-0" : "right-0 min-w-[180px]",
+            "animate-pop-in absolute top-full mt-1.5 z-50 bg-bg-card rounded-lg border border-border shadow-[0_8px_28px_-6px_rgba(0,0,0,0.16),0_0_0_0.5px_rgba(0,0,0,0.04)] p-1",
+            fullWidth ? "left-0 right-0 origin-top" : "right-0 min-w-[180px] origin-top-right",
           )}
         >
           {options.map((opt) => (
@@ -80,7 +82,8 @@ export default function Select({
                 setOpen(false);
               }}
               className={cn(
-                "w-full text-left px-3 py-2 rounded-md text-sm transition-colors flex items-start gap-2",
+                "w-full text-left px-3 py-2 rounded-md text-sm flex items-start gap-2",
+                "transition-colors duration-150 ease-out motion-reduce:transition-none",
                 opt.value === value
                   ? "bg-accent-subtle text-accent"
                   : "text-text-primary hover:bg-bg-tertiary",

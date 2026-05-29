@@ -28,10 +28,55 @@
     font-size: 14px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   #root {
     height: 100%;
+  }
+
+  /* Tighter, balanced headings — large text wants negative tracking. */
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+    letter-spacing: -0.011em;
+  }
+
+  /* Dynamic figures (stats, counters, durations) must not jitter as they
+     change width. Opt in with `tabular-nums`. */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Subtle entrance for popovers/menus — origin-aware, ease-out. */
+  @keyframes pop-in {
+    from {
+      opacity: 0;
+      transform: scale(0.96) translateY(-2px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  .animate-pop-in {
+    animation: pop-in 0.14s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: top;
+  }
+
+  /* Respect the user's motion preference everywhere by default. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 
   #root[data-window="main"] {
