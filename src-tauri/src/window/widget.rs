@@ -1,5 +1,60 @@
 use crate::error::AppError;
-use tauri::{LogicalSize, Manager, PhysicalPosition, WebviewWindow};
+use crate::state::AppState;
+use crate::storage::config::ConfigStore;
+use tauri::{AppHandle, LogicalSize, Manager, PhysicalPosition, WebviewWindow};
+
+/// Force the widget visible (used when a recording starts), WITHOUT stealing
+/// keyboard focus from the user's active app. On macOS the widget is an
+/// `NSPanel`; a plain `show()` calls `makeKeyAndOrderFront`, which would steal
+/// focus and break paste injection — so we order it front "regardless" instead.
+pub fn show(app_handle: &AppHandle) {
+    #[cfg(target_os = "macos")]
+    {
+        use tauri_nspanel::ManagerExt;
+        if let Ok(panel) = app_handle.get_webview_panel("widget") {
+            if !panel.is_visible() {
+                panel.order_front_regardless();
+            }
+            return;
+        }
+    }
+
+    if let Some(widget) = app_handle.get_webview_window("widget") {
+        if !widget.is_visible().unwrap_or(false) {
+            let _ = widget.show();
+        }
+    }
+}
+
+/// Restore the widget to the user's configured visibility. Called when the
+/// pipeline returns to idle, so a hidden widget that we surfaced for recording
+/// gets hidden again.
+pub fn restore_visibility(app_handle: &AppHandle) {
+    let state = app_handle.state::<AppState>();
+    let visible = state
+        .db
+        .lock()
+        .ok()
+        .and_then(|db| db.get_config("widgetVisible").ok().flatten())
+        .map_or(true, |v| v == "true");
+
+    if visible {
+        return;
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        use tauri_nspanel::ManagerExt;
+        if let Ok(panel) = app_handle.get_webview_panel("widget") {
+            panel.order_out(None);
+            return;
+        }
+    }
+
+    if let Some(widget) = app_handle.get_webview_window("widget") {
+        let _ = widget.hide();
+    }
+}
 
 pub fn apply_position_and_size(
     widget: &WebviewWindow,
