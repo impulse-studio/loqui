@@ -1,0 +1,32 @@
+src/shared/components/toggle.tsx
+  s_16b2afec36ad79::t_7978817c5a8145 12-17,22,26-33,38-41,45
+src/shared/components/select/select.tsx
+  s_16b2afec36ad79::t_edb4299d5b6352 72-73
+  s_16b2afec36ad79::t_2329857e2ce192 85-86
+  s_16b2afec36ad79::t_640e5652728d07 50-52
+src-tauri/src/lib.rs
+  s_16b2afec36ad79::t_be8f53ab4a192c 179,191-196,200-204
+src/index.css
+  s_16b2afec36ad79::t_c840fa3e5bc8c6 53-69
+  s_16b2afec36ad79::t_65c276f38b5ef0 31-32,39-52,70-79
+src-tauri/src/agent/pipeline.rs
+  s_16b2afec36ad79::t_6c5dac244d5c24 488-495,499-522
+src/dashboard/stats/stats-row.tsx
+  s_16b2afec36ad79::t_65dd3571d7034c 29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "0c8a7eb8e9668ff8aee004148f517fe471e9b17f",
+  "prompts": {},
+  "sessions": {
+    "s_16b2afec36ad79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2d507812-79ae-4905-99f1-0a9e9f0c4f1a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Leonard Roussard <lroussard@gmail.com>"
+    }
+  }
+}
