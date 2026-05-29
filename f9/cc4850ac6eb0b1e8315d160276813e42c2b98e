@@ -1,0 +1,26 @@
+src-tauri/src/window/widget.rs
+  s_16b2afec36ad79::t_392cca5dde9e44 2-5,10,22,26-40,51,56-57
+  s_16b2afec36ad79::t_488056d5e6b8f6 6-9,11-21,23-25,41-50,52-55
+src-tauri/src/storage/transcripts.rs
+  s_16b2afec36ad79::t_c54914836cb7df 76-87
+src-tauri/src/agent/pipeline.rs
+  s_16b2afec36ad79::t_d6bad5f17a5fc8 488-489
+  s_16b2afec36ad79::t_aa3e07b72c7b84 491-492
+  s_16b2afec36ad79::t_2deb9d4007a368 248
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "f9cc4850ac6eb0b1e8315d160276813e42c2b98e",
+  "prompts": {},
+  "sessions": {
+    "s_16b2afec36ad79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2d507812-79ae-4905-99f1-0a9e9f0c4f1a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Leonard Roussard <lroussard@gmail.com>"
+    }
+  }
+}
