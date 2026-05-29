@@ -53,7 +53,7 @@ jobs:
           - name: Linux
             runner: ubuntu-22.04
           - name: Windows
-            runner: windows-latest
+            runner: blacksmith-4vcpu-windows-2025
     runs-on: ${{ matrix.runner }}
 
     steps:
