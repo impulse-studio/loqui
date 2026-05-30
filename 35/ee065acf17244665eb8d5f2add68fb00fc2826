@@ -1,0 +1,79 @@
+src/shared/components/searchable-select/searchable-select.tsx
+  s_16b2afec36ad79::t_4faff0f6363c4b 116-118
+  s_16b2afec36ad79::t_63bed143f7547c 154-155
+  s_16b2afec36ad79::t_d34a8c4ec54748 136,139
+src/settings/speech/speech-model-modal.tsx
+  s_16b2afec36ad79::t_999720fcbba49f 123
+src/onboarding/steps/step-microphone.tsx
+  s_16b2afec36ad79::t_bbc9f2cfa4524b 173
+src/transcripts/transcript-item.tsx
+  s_16b2afec36ad79::t_798da877b43c01 22-24
+src/index.css
+  s_16b2afec36ad79::t_d517ff61b4c224 34-42
+  s_16b2afec36ad79::t_df5622e220c090 19-30
+  s_16b2afec36ad79::t_84f3b2844e9ce8 91-119
+src/shared/components/button/button.tsx
+  s_16b2afec36ad79::t_b45693004cf507 24-26
+  s_16b2afec36ad79::t_b810fb26335d3b 7-8,19,23,27-30,32
+src/shared/components/card.tsx
+  s_16b2afec36ad79::t_2ceffc389cedd7 7-8,14,21,23-24
+src/profiles/llm/llm-model-selector.tsx
+  s_16b2afec36ad79::t_4d4969c9e39671 106-108
+src/shared/components/model-card/model-card.tsx
+  s_16b2afec36ad79::t_2f001139f3f31f 23-25
+.doctor/dupe-ignore
+  s_16b2afec36ad79::t_afed0696544347 26
+src/shared/components/period-selector.tsx
+  s_16b2afec36ad79::t_f28d429818fff0 17-19
+src/settings/about/about-section.tsx
+  s_16b2afec36ad79::t_d39be5143e5cbb 4
+  s_16b2afec36ad79::t_3658a79d310723 31-32,34,38
+  s_16b2afec36ad79::t_15dbee7b498f7c 19-20,22,26
+src/shared/components/modal.tsx
+  s_16b2afec36ad79::t_fbf6b0425019eb 2
+  s_16b2afec36ad79::t_481d7161fbc9bf 1,12-13,17-49,52-57,63-68,70,74-75,78,80-81
+src/settings/llm/llm-model-download-row.tsx
+  s_16b2afec36ad79::t_3e4ff226bde07b 83
+src/shared/components/badge/badge.tsx
+  s_16b2afec36ad79::t_fbb12f3398cd5f 14
+src/settings/general/general-section.tsx
+  s_16b2afec36ad79::t_ffc7fc060d0953 57-58,60,63
+  s_16b2afec36ad79::t_8dec4b66e35beb 4
+src/profiles/list/profile-list-item.tsx
+  s_16b2afec36ad79::t_85cfcc348a98dd 30-32
+src/shared/components/button/button-size-styles.ts
+  s_16b2afec36ad79::t_4c904faf0600dd 2-3
+src/layout/sidebar.tsx
+  s_16b2afec36ad79::t_e7f8807e08dd05 5
+  s_16b2afec36ad79::t_6f123537e362a6 49-53,55
+  s_16b2afec36ad79::t_e49cbdddb631dc 67,69-70,72,75
+  s_16b2afec36ad79::t_9280cf63774014 21-22,24,27-28,30
+src/shared/components/button/button-variant-styles.ts
+  s_16b2afec36ad79::t_d84b911ae266f0 8-10
+src/onboarding/onboarding-layout.tsx
+  s_16b2afec36ad79::t_1bfc661c721ff3 53
+  s_16b2afec36ad79::t_f6926353c0e7e3 120
+  s_16b2afec36ad79::t_e788ee281fdb45 136
+  s_16b2afec36ad79::t_83f5d20dde8753 140
+  s_16b2afec36ad79::t_e681107637bce6 87-90
+src/widget/idle-bar.tsx
+  s_16b2afec36ad79::t_3ead442592cb47 9
+src/shared/components/modal-focusable-selector.ts
+  s_16b2afec36ad79::t_ff897ee592884d 1-5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "35ee065acf17244665eb8d5f2add68fb00fc2826",
+  "prompts": {},
+  "sessions": {
+    "s_16b2afec36ad79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2d507812-79ae-4905-99f1-0a9e9f0c4f1a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": null
+    }
+  }
+}
