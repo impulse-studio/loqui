@@ -6,7 +6,7 @@ export default function IdleBar() {
         rounded-lg
         bg-white/60
         hover:bg-white/85
-        transition-all duration-300
+        transition-colors duration-300 motion-reduce:transition-none
       "
     />
   );

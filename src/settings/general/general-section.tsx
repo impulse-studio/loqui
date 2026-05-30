@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Card from "../../shared/components/card";
 import Toggle from "../../shared/components/toggle";
+import Button from "../../shared/components/button/button";
 import {
   setConfig,
   enableAutostart,
@@ -53,12 +54,13 @@ export default function GeneralSection() {
           </div>
           <div className="flex items-center gap-3">
             <HotkeyDisplay hotkey={hotkey} />
-            <button
+            <Button
+              variant="link"
               onClick={() => setShowHotkeyModal(true)}
-              className="text-xs text-accent font-medium hover:underline"
+              className="text-xs"
             >
               Change
-            </button>
+            </Button>
           </div>
         </div>
         <div className="flex items-center justify-between px-5 py-4">

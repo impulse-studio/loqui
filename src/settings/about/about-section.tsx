@@ -1,6 +1,7 @@
 import { open } from "@tauri-apps/plugin-shell";
 import { ExternalLink } from "lucide-react";
 import Card from "../../shared/components/card";
+import Button from "../../shared/components/button/button";
 import appVersion from "../../shared/constants/app-version";
 
 export default function AboutSection() {
@@ -15,24 +16,26 @@ export default function AboutSection() {
 
         <div className="flex items-center justify-between px-5 py-4">
           <span className="text-sm">Source code</span>
-          <button
+          <Button
+            variant="link"
             onClick={() => open("https://github.com/impulse-studio/loqui")}
-            className="inline-flex items-center gap-1.5 text-xs text-accent font-medium hover:underline"
+            className="text-xs"
           >
             GitHub
             <ExternalLink size={12} />
-          </button>
+          </Button>
         </div>
 
         <div className="flex items-center justify-between px-5 py-4">
           <span className="text-sm">Report an issue</span>
-          <button
+          <Button
+            variant="link"
             onClick={() => open("https://github.com/impulse-studio/loqui/issues")}
-            className="inline-flex items-center gap-1.5 text-xs text-accent font-medium hover:underline"
+            className="text-xs"
           >
             Feedback
             <ExternalLink size={12} />
-          </button>
+          </Button>
         </div>
       </Card>
     </section>

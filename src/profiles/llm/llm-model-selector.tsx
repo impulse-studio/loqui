@@ -103,7 +103,9 @@ export default function LlmModelSelector({
             type="button"
             onClick={() => onProviderChange(tab.id)}
             className={cn(
-              "flex-1 px-2 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer",
+              "flex-1 px-2 py-1.5 text-xs font-medium rounded-md cursor-pointer",
+              "transition-colors duration-150 ease-out motion-reduce:transition-none",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
               llmProvider === tab.id
                 ? "bg-bg-primary text-text-primary shadow-sm"
                 : "text-text-tertiary hover:text-text-secondary",
