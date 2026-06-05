@@ -1,0 +1,70 @@
+src/shared/components/modal-focusable-selector.ts
+  s_16b2afec36ad79::t_cfdd219de9c6f4 1-2,4
+src/dashboard/dashboard-page.tsx
+  s_16b2afec36ad79::t_0acd713fc74795 2,15-18,22,24,35-37
+src-tauri/src/window/widget.rs
+  s_16b2afec36ad79::t_4d2b00b1f84b85 10-13,15-24,28-31,33,38-39,53-61,64-67
+src/widget/widget-app.tsx
+  s_16b2afec36ad79::t_427784e8f56bd3 37-38
+src/settings/about/about-section.tsx
+  s_16b2afec36ad79::t_1d462c5debff68 10
+src/shared/components/modal.tsx
+  s_16b2afec36ad79::t_e584b1c34f66e9 69
+  s_16b2afec36ad79::t_610af2bd6dd607 14-19,30-32,35-38,42
+src-tauri/tauri.conf.json
+  s_16b2afec36ad79::t_c539073821fcdb 24-27
+src/shared/components/toggle.tsx
+  s_16b2afec36ad79::t_31d05d34723b49 7-8,12
+  s_16b2afec36ad79::t_3765ef8cec6be8 24
+src/shared/components/page-header.tsx
+  s_16b2afec36ad79::t_ad3671d9d0c68e 1-24
+src/dashboard/stats/stat-cards.ts
+  s_16b2afec36ad79::t_ac4e4038004239 1-19
+src/settings/data/data-section.tsx
+  s_16b2afec36ad79::t_1d462c5debff68 57
+src/settings/speech/speech-section.tsx
+  s_16b2afec36ad79::t_1d462c5debff68 90
+src/settings/settings-page.tsx
+  s_16b2afec36ad79::t_99f4491454f038 1,13-16
+src/dashboard/stats/stats-row.tsx
+  s_16b2afec36ad79::t_45721fd5b05c82 5,15-22,24
+src/settings/llm/llm-section.tsx
+  s_16b2afec36ad79::t_0469796b17a1f3 48
+src/profiles/profiles-page.tsx
+  s_16b2afec36ad79::t_529b0efd583111 95
+src/transcripts/transcripts-page.tsx
+  s_16b2afec36ad79::t_2208283a05e087 102
+src/widget/hooks/use-fft-bars.ts
+  s_16b2afec36ad79::t_181eca87de9fd5 6-19,25,33,35,37-44,67
+src/layout/sidebar.tsx
+  s_16b2afec36ad79::t_fc9ae393ab6614 14-15,18
+src/index.css
+  s_16b2afec36ad79::t_7e56979f433125 129-130
+src/layout/main-layout.tsx
+  s_16b2afec36ad79::t_2236a6604cbfe4 8
+src/settings/debug-section.tsx
+  s_16b2afec36ad79::t_1d462c5debff68 14
+src/settings/general/general-section.tsx
+  s_16b2afec36ad79::t_dc853dfb5ef96c 74
+  s_16b2afec36ad79::t_143a01558c61e0 82
+  s_16b2afec36ad79::t_1d462c5debff68 46
+src/settings/widget/widget-section.tsx
+  s_16b2afec36ad79::t_8efb9e941ddbd6 36
+  s_16b2afec36ad79::t_1d462c5debff68 31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "22291ac3c4b64c04c8dc9b13f7a32971a51fd087",
+  "prompts": {},
+  "sessions": {
+    "s_16b2afec36ad79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2d507812-79ae-4905-99f1-0a9e9f0c4f1a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Leonard Roussard <lroussard@gmail.com>"
+    }
+  }
+}
