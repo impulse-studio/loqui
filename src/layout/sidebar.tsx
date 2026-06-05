@@ -1,5 +1,4 @@
 import { NavLink } from "react-router-dom";
-import { getCurrentWindow } from "@tauri-apps/api/window";
 import { open } from "@tauri-apps/plugin-shell";
 import cn from "../shared/lib/utils/cn";
 import Button from "../shared/components/button/button";
@@ -12,24 +11,12 @@ export default function Sidebar() {
 
   return (
     <aside className="w-[172px] min-w-[172px] h-full bg-bg-secondary border-r border-border flex flex-col">
+      {/* Left padding reserves room for the native macOS traffic lights,
+          which the Overlay titlebar floats over this corner. */}
       <div
         data-tauri-drag-region
-        className="flex items-center gap-2.5 px-4 h-11 shrink-0 border-b border-border"
+        className="flex items-center pl-[78px] pr-4 h-11 shrink-0 border-b border-border"
       >
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            aria-label="Close window"
-            onClick={() => getCurrentWindow().close()}
-            className="w-3 h-3 rounded-full bg-mac-close transition-[filter] duration-150 hover:brightness-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
-          />
-          <button
-            type="button"
-            aria-label="Minimize window"
-            onClick={() => getCurrentWindow().minimize()}
-            className="w-3 h-3 rounded-full bg-mac-min transition-[filter] duration-150 hover:brightness-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
-          />
-        </div>
         <span
           data-tauri-drag-region
           className="text-[13px] font-medium text-text-secondary"

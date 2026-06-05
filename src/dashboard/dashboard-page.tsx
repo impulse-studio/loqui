@@ -1,4 +1,5 @@
 import { useState } from "react";
+import PageHeader from "../shared/components/page-header";
 import PeriodSelector from "../shared/components/period-selector";
 import statPeriods from "./activity/stat-periods";
 import periodToDays from "./activity/period-to-days";
@@ -11,13 +12,16 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+      <PageHeader
+        title="Dashboard"
+        description="Your dictation activity at a glance."
+      />
 
       <StatsRow />
 
-      <div className="mb-8">
+      <div className="mb-10">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Activity</h2>
+          <h2 className="text-[15px] font-semibold tracking-[-0.01em]">Activity</h2>
           <PeriodSelector
             periods={statPeriods}
             active={activePeriod}
@@ -28,7 +32,9 @@ export default function DashboardPage() {
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold mb-4">Recent Transcripts</h2>
+        <h2 className="text-[15px] font-semibold tracking-[-0.01em] mb-4">
+          Recent Transcripts
+        </h2>
         <RecentTranscripts />
       </div>
     </div>

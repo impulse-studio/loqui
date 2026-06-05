@@ -17,11 +17,6 @@
   --color-recording: #ef4444;
   --color-border: #e5e5e0;
 
-  /* macOS window-control colors (was hardcoded in the sidebar). */
-  --color-mac-close: #ff5f57;
-  --color-mac-min: #febc2e;
-  --color-mac-max: #28c840;
-
   /* Elevation scale — each pairs a hairline ring with a soft shadow so cards
      and overlays blend on any background instead of showing a harsh border.
      Maps to `shadow-card` / `shadow-popover` / `shadow-overlay` utilities. */
@@ -131,9 +126,9 @@
 
   #root[data-window="main"] {
     background-color: var(--color-bg-primary);
-    border-radius: 12px;
+    /* Native window chrome (decorations + Overlay titlebar) draws the frame,
+       corners and shadow now — no custom border/radius needed. */
     overflow: hidden;
-    border: 1px solid var(--color-border);
   }
 
   /* Scrollbar styling */

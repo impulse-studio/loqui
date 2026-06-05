@@ -7,7 +7,7 @@ import appVersion from "../../shared/constants/app-version";
 export default function AboutSection() {
   return (
     <section className="mb-8">
-      <h2 className="text-base font-semibold mb-3">About</h2>
+      <h2 className="text-[15px] font-semibold tracking-[-0.01em] mb-3">About</h2>
       <Card className="divide-y divide-border">
         <div className="flex items-center justify-between px-5 py-4">
           <span className="text-sm">Version</span>

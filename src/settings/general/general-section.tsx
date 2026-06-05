@@ -43,7 +43,7 @@ export default function GeneralSection() {
 
   return (
     <section className="mb-8">
-      <h2 className="text-base font-semibold mb-3">General</h2>
+      <h2 className="text-[15px] font-semibold tracking-[-0.01em] mb-3">General</h2>
       <Card className="divide-y divide-border">
         <div className="flex items-center justify-between px-5 py-4">
           <div>
@@ -71,6 +71,7 @@ export default function GeneralSection() {
             </div>
           </div>
           <Toggle
+            ariaLabel="Copy to clipboard"
             checked={copyToClipboard}
             onChange={handleToggleCopyToClipboard}
           />
@@ -78,6 +79,7 @@ export default function GeneralSection() {
         <div className="flex items-center justify-between px-5 py-4">
           <span className="text-sm">Launch at startup</span>
           <Toggle
+            ariaLabel="Launch at startup"
             checked={launchAtStartup}
             onChange={handleToggleStartup}
           />

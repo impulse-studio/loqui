@@ -11,6 +11,12 @@ interface ModalProps {
 export default function Modal({ open, onClose, title, children }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
+  // Keep the latest onClose without making it an effect dependency — otherwise
+  // a non-memoized onClose would re-run the effect on every render and bounce
+  // focus back to the trigger while the dialog is still open.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   useEffect(() => {
     if (!open) return;
 
@@ -21,14 +27,19 @@ export default function Modal({ open, onClose, title, children }: ModalProps) {
     const { overflow } = document.body.style;
     document.body.style.overflow = "hidden";
 
-    // Move focus into the dialog.
+    // Move focus into the dialog: try the first focusable control, then fall
+    // back to the panel itself (tabIndex=-1) if that target wasn't focusable
+    // (e.g. hidden), so the trap always holds.
     const panel = panelRef.current;
     const focusables = panel?.querySelectorAll<HTMLElement>(FOCUSABLE);
-    (focusables?.[0] ?? panel)?.focus();
+    focusables?.[0]?.focus();
+    if (panel && !panel.contains(document.activeElement)) {
+      panel.focus();
+    }
 
     function handleKey(e: KeyboardEvent) {
       if (e.key === "Escape") {
-        onClose();
+        onCloseRef.current();
         return;
       }
       // Trap Tab within the dialog.
@@ -55,7 +66,7 @@ export default function Modal({ open, onClose, title, children }: ModalProps) {
       document.body.style.overflow = overflow;
       previouslyFocused?.focus();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
 

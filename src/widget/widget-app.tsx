@@ -34,7 +34,8 @@ function Widget() {
   const stateRef = useRef<WidgetState>("model-loading");
   stateRef.current = state;
 
-  const bars = useFftBars(state === "recording" ? audioLevel : 0);
+  const isRecording = state === "recording";
+  const bars = useFftBars(isRecording ? audioLevel : 0, isRecording);
 
   const isActive =
     state === "recording" ||

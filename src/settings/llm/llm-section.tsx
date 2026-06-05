@@ -45,7 +45,7 @@ export default function LlmSection() {
 
   return (
     <section className="mb-8 space-y-4">
-      <h2 className="text-base font-semibold">LLM Refactoring</h2>
+      <h2 className="text-[15px] font-semibold tracking-[-0.01em]">LLM Refactoring</h2>
 
       <LlmLocalSettings loadedId={loadedId} onModelLoaded={handleModelLoaded} />
 

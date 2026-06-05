@@ -87,7 +87,7 @@ export default function SpeechSection() {
 
   return (
     <section className="mb-8">
-      <h2 className="text-base font-semibold mb-3">Speech Recognition</h2>
+      <h2 className="text-[15px] font-semibold tracking-[-0.01em] mb-3">Speech Recognition</h2>
 
       <div className="space-y-3">
         <Card className="divide-y divide-border">
