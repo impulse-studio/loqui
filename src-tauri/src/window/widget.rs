@@ -1,5 +1,75 @@
 use crate::error::AppError;
-use tauri::{LogicalSize, Manager, PhysicalPosition, WebviewWindow};
+use crate::state::AppState;
+use crate::storage::config::ConfigStore;
+use tauri::{AppHandle, LogicalSize, Manager, PhysicalPosition, WebviewWindow};
+
+/// Force the widget visible (used when a recording starts), WITHOUT stealing
+/// keyboard focus from the user's active app. On macOS the widget is an
+/// `NSPanel`; a plain `show()` calls `makeKeyAndOrderFront`, which would steal
+/// focus and break paste injection — so we order it front "regardless" instead.
+///
+/// NSPanel/AppKit calls must happen on the main thread. The pipeline drives
+/// this from the hotkey listener thread, so we hop to the main thread first —
+/// calling AppKit off-main crashes the process.
+pub fn show(app_handle: &AppHandle) {
+    let app = app_handle.clone();
+    if let Err(e) = app_handle.run_on_main_thread(move || {
+        #[cfg(target_os = "macos")]
+        {
+            use tauri_nspanel::ManagerExt;
+            if let Ok(panel) = app.get_webview_panel("widget") {
+                if !panel.is_visible() {
+                    panel.order_front_regardless();
+                }
+                return;
+            }
+        }
+
+        if let Some(widget) = app.get_webview_window("widget") {
+            if !widget.is_visible().unwrap_or(false) {
+                let _ = widget.show();
+            }
+        }
+    }) {
+        log::error!("Failed to dispatch widget show to main thread: {e}");
+    }
+}
+
+/// Restore the widget to the user's configured visibility. Called when the
+/// pipeline returns to idle, so a hidden widget that we surfaced for recording
+/// gets hidden again. The DB read is thread-safe; the AppKit hide is dispatched
+/// to the main thread (see [`show`]).
+pub fn restore_visibility(app_handle: &AppHandle) {
+    let state = app_handle.state::<AppState>();
+    let visible = state
+        .db
+        .lock()
+        .ok()
+        .and_then(|db| db.get_config("widgetVisible").ok().flatten())
+        .map_or(true, |v| v == "true");
+
+    if visible {
+        return;
+    }
+
+    let app = app_handle.clone();
+    if let Err(e) = app_handle.run_on_main_thread(move || {
+        #[cfg(target_os = "macos")]
+        {
+            use tauri_nspanel::ManagerExt;
+            if let Ok(panel) = app.get_webview_panel("widget") {
+                panel.order_out(None);
+                return;
+            }
+        }
+
+        if let Some(widget) = app.get_webview_window("widget") {
+            let _ = widget.hide();
+        }
+    }) {
+        log::error!("Failed to dispatch widget hide to main thread: {e}");
+    }
+}
 
 pub fn apply_position_and_size(
     widget: &WebviewWindow,

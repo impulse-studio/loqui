@@ -19,7 +19,9 @@ export default function TranscriptItem({
     <button
       onClick={onClick}
       className={cn(
-        "w-full text-left px-4 py-3 transition-colors border-l-2",
+        "w-full text-left px-4 py-3 border-l-2",
+        "transition-colors duration-150 ease-out motion-reduce:transition-none",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/40",
         selected
           ? "border-accent bg-accent/5"
           : "border-transparent hover:bg-bg-tertiary/50"

@@ -92,7 +92,7 @@ export default function ProfilesPage() {
   }
 
   return (
-    <div className="flex h-full -mx-8 -my-6">
+    <div className="flex h-full -mx-10 -my-8">
       <ProfileList
         profiles={profiles}
         selectedId={selectedId}

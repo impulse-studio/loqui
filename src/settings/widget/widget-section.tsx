@@ -28,11 +28,12 @@ export default function WidgetSection() {
 
   return (
     <section className="mb-8">
-      <h2 className="text-base font-semibold mb-3">Widget</h2>
+      <h2 className="text-[15px] font-semibold tracking-[-0.01em] mb-3">Widget</h2>
       <Card className="divide-y divide-border">
         <div className="flex items-center justify-between px-5 py-4">
           <span className="text-sm">Show widget</span>
           <Toggle
+            ariaLabel="Show widget"
             checked={visible}
             onChange={(v) => {
               setVisible(v);

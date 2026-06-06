@@ -245,7 +245,7 @@ fn process_recording(app_handle: &AppHandle, context: RecordingContext) -> Resul
 
         // Auto-prune if size-based retention is configured
         if let Ok(Some(retention)) = db.get_config("transcriptRetention") {
-            if let Some(max_bytes) = parse_retention_bytes(&retention) {
+            if let Some(max_bytes) = crate::storage::transcripts::parse_retention_bytes(&retention) {
                 match db.prune_transcripts(max_bytes) {
                     Ok(n) if n > 0 => log::info!("Pruned {n} old transcripts (retention: {retention})"),
                     Err(e) => log::error!("Failed to prune transcripts: {e}"),
@@ -485,15 +485,12 @@ fn hot_swap_llm(app_handle: &AppHandle, model_id: &str) -> Result<(), AppError> 
 }
 
 fn emit_state(app_handle: &AppHandle, state: &str) -> Result<(), tauri::Error> {
-    app_handle.emit("agent-state-changed", serde_json::json!({ "state": state }))
-}
-
-fn parse_retention_bytes(value: &str) -> Option<i64> {
-    match value {
-        "100mb" => Some(104_857_600),
-        "500mb" => Some(524_288_000),
-        "1gb" => Some(1_073_741_824),
-        "5gb" => Some(5_368_709_120),
-        _ => None,
+    // Surface the widget while a recording is active (even when hidden), then
+    // restore the user's configured visibility once we settle back to idle.
+    match state {
+        "recording" => crate::window::widget::show(app_handle),
+        "idle" => crate::window::widget::restore_visibility(app_handle),
+        _ => {}
     }
+    app_handle.emit("agent-state-changed", serde_json::json!({ "state": state }))
 }

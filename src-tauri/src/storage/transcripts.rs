@@ -73,3 +73,15 @@ pub trait TranscriptStore {
     fn get_db_size(&self) -> Result<i64>;
     fn prune_transcripts(&self, max_bytes: i64) -> Result<i64>;
 }
+
+/// Map a size-based retention setting (e.g. `"500mb"`) to its byte budget.
+/// Returns `None` for unbounded / unrecognized values.
+pub fn parse_retention_bytes(value: &str) -> Option<i64> {
+    match value {
+        "100mb" => Some(104_857_600),
+        "500mb" => Some(524_288_000),
+        "1gb" => Some(1_073_741_824),
+        "5gb" => Some(5_368_709_120),
+        _ => None,
+    }
+}

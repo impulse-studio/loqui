@@ -170,7 +170,7 @@ export default function StepMicrophone({ goNext, setFooter }: StepComponentProps
 
         <div className="flex-1 h-3 bg-bg-tertiary rounded-full overflow-hidden">
           <div
-            className="h-full bg-accent rounded-full transition-all duration-75"
+            className="h-full bg-accent rounded-full transition-[width] duration-75 motion-reduce:transition-none"
             style={{ width: `${Math.min(level * 100, 100)}%` }}
           />
         </div>

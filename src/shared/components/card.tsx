@@ -4,19 +4,24 @@ import cn from "../lib/utils/cn";
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
   featured?: boolean;
+  /** Adds a subtle hover lift for clickable cards. */
+  interactive?: boolean;
 }
 
 export default function Card({
   children,
   featured = false,
+  interactive = false,
   className = "",
   ...props
 }: CardProps) {
   return (
     <div
       className={cn(
-        "bg-bg-card rounded-xl border shadow-[0_1px_3px_rgba(0,0,0,0.04)]",
+        "bg-bg-card rounded-xl border shadow-[var(--shadow-card)]",
         featured ? "border-accent" : "border-border",
+        interactive &&
+          "transition-shadow duration-200 ease-out motion-reduce:transition-none hover:shadow-[var(--shadow-popover)]",
         className
       )}
       {...props}

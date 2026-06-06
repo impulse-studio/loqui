@@ -113,7 +113,9 @@ export default function SearchableSelect({
           type="button"
           onClick={() => setOpen(true)}
           className={cn(
-            "w-full flex items-center gap-2 border rounded-lg px-3 py-2 text-sm transition-colors cursor-pointer",
+            "w-full flex items-center gap-2 border rounded-lg px-3 py-2 text-sm cursor-pointer",
+            "transition-colors duration-150 ease-out motion-reduce:transition-none",
+            "focus-visible:outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/20",
             "border-border bg-bg-primary text-text-primary hover:border-text-tertiary",
           )}
         >
@@ -131,10 +133,10 @@ export default function SearchableSelect({
         <div
           ref={listRef}
           className={cn(
-            "absolute left-0 right-0 top-full mt-1 z-50",
+            "animate-pop-in origin-top absolute left-0 right-0 top-full mt-1.5 z-[var(--z-dropdown)]",
             "max-h-64 overflow-y-auto",
             "bg-bg-card rounded-lg border border-border",
-            "shadow-[0_4px_24px_rgba(0,0,0,0.08)] p-1",
+            "shadow-[var(--shadow-popover)] p-1",
           )}
         >
           {filtered.length === 0 && (
@@ -149,7 +151,8 @@ export default function SearchableSelect({
               onClick={() => handleSelect(opt.value)}
               onMouseEnter={() => setHighlightIndex(i)}
               className={cn(
-                "w-full text-left px-3 py-2 rounded-md text-sm transition-colors flex items-center gap-2",
+                "w-full text-left px-3 py-2 rounded-md text-sm flex items-center gap-2",
+                "transition-colors duration-150 ease-out motion-reduce:transition-none",
                 i === highlightIndex && "bg-bg-tertiary",
                 opt.value === value
                   ? "text-accent"
