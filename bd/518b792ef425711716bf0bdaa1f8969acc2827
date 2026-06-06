@@ -1,0 +1,20 @@
+src-tauri/src/window/widget.rs
+  s_16b2afec36ad79::t_259bada5eae51f 56,69-71
+  s_16b2afec36ad79::t_39d2b5dea09ec4 16,33-35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "bd518b792ef425711716bf0bdaa1f8969acc2827",
+  "prompts": {},
+  "sessions": {
+    "s_16b2afec36ad79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2d507812-79ae-4905-99f1-0a9e9f0c4f1a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Leonard Roussard <lroussard@gmail.com>"
+    }
+  }
+}
