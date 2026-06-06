@@ -1,13 +1,16 @@
 import cn from "../lib/utils/cn";
 
-interface ToggleProps {
+// Every switch must have an accessible name: either a visible `label` or an
+// `ariaLabel` (for switches whose text label lives elsewhere in the row).
+// The union makes an unnamed `<Toggle>` a compile-time error.
+type ToggleProps = {
   checked: boolean;
   onChange: (checked: boolean) => void;
-  label?: string;
-  /** Accessible name when the switch has no visible `label` (external label). */
-  ariaLabel?: string;
   disabled?: boolean;
-}
+} & (
+  | { label: string; ariaLabel?: string }
+  | { ariaLabel: string; label?: string }
+);
 
 export default function Toggle({ checked, onChange, label, ariaLabel, disabled }: ToggleProps) {
   return (
