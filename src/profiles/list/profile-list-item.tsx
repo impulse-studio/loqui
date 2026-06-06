@@ -27,7 +27,9 @@ export default function ProfileListItem({
       type="button"
       onClick={onSelect}
       className={cn(
-        "w-full text-left px-3 py-3 rounded-lg transition-colors cursor-pointer flex items-center justify-between",
+        "w-full text-left px-3 py-3 rounded-lg cursor-pointer flex items-center justify-between gap-2",
+        "transition-colors duration-150 ease-out motion-reduce:transition-none",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
         selected
           ? "bg-accent-subtle"
           : "hover:bg-bg-secondary"

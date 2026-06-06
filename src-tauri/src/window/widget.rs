@@ -7,28 +7,36 @@ use tauri::{AppHandle, LogicalSize, Manager, PhysicalPosition, WebviewWindow};
 /// keyboard focus from the user's active app. On macOS the widget is an
 /// `NSPanel`; a plain `show()` calls `makeKeyAndOrderFront`, which would steal
 /// focus and break paste injection — so we order it front "regardless" instead.
+///
+/// NSPanel/AppKit calls must happen on the main thread. The pipeline drives
+/// this from the hotkey listener thread, so we hop to the main thread first —
+/// calling AppKit off-main crashes the process.
 pub fn show(app_handle: &AppHandle) {
-    #[cfg(target_os = "macos")]
-    {
-        use tauri_nspanel::ManagerExt;
-        if let Ok(panel) = app_handle.get_webview_panel("widget") {
-            if !panel.is_visible() {
-                panel.order_front_regardless();
+    let app = app_handle.clone();
+    let _ = app_handle.run_on_main_thread(move || {
+        #[cfg(target_os = "macos")]
+        {
+            use tauri_nspanel::ManagerExt;
+            if let Ok(panel) = app.get_webview_panel("widget") {
+                if !panel.is_visible() {
+                    panel.order_front_regardless();
+                }
+                return;
             }
-            return;
         }
-    }
 
-    if let Some(widget) = app_handle.get_webview_window("widget") {
-        if !widget.is_visible().unwrap_or(false) {
-            let _ = widget.show();
+        if let Some(widget) = app.get_webview_window("widget") {
+            if !widget.is_visible().unwrap_or(false) {
+                let _ = widget.show();
+            }
         }
-    }
+    });
 }
 
 /// Restore the widget to the user's configured visibility. Called when the
 /// pipeline returns to idle, so a hidden widget that we surfaced for recording
-/// gets hidden again.
+/// gets hidden again. The DB read is thread-safe; the AppKit hide is dispatched
+/// to the main thread (see [`show`]).
 pub fn restore_visibility(app_handle: &AppHandle) {
     let state = app_handle.state::<AppState>();
     let visible = state
@@ -42,18 +50,21 @@ pub fn restore_visibility(app_handle: &AppHandle) {
         return;
     }
 
-    #[cfg(target_os = "macos")]
-    {
-        use tauri_nspanel::ManagerExt;
-        if let Ok(panel) = app_handle.get_webview_panel("widget") {
-            panel.order_out(None);
-            return;
+    let app = app_handle.clone();
+    let _ = app_handle.run_on_main_thread(move || {
+        #[cfg(target_os = "macos")]
+        {
+            use tauri_nspanel::ManagerExt;
+            if let Ok(panel) = app.get_webview_panel("widget") {
+                panel.order_out(None);
+                return;
+            }
         }
-    }
 
-    if let Some(widget) = app_handle.get_webview_window("widget") {
-        let _ = widget.hide();
-    }
+        if let Some(widget) = app.get_webview_window("widget") {
+            let _ = widget.hide();
+        }
+    });
 }
 
 pub fn apply_position_and_size(

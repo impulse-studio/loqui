@@ -120,7 +120,7 @@ export default function SpeechModelModal({
           >
             {downloading && (
               <span
-                className="absolute inset-0 bg-accent/20 transition-all duration-300"
+                className="absolute inset-0 bg-accent/20 transition-[width] duration-300 motion-reduce:transition-none"
                 style={{ width: `${pct}%` }}
               />
             )}

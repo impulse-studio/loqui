@@ -50,7 +50,7 @@ export default function OnboardingLayout({ onComplete }: OnboardingLayoutProps) 
   if (!steps) {
     return (
       <div className="flex items-center justify-center h-screen bg-bg-primary text-sm text-text-tertiary">
-        Loading...
+        Loading…
       </div>
     );
   }
@@ -84,8 +84,10 @@ export default function OnboardingLayout({ onComplete }: OnboardingLayoutProps) 
               </div>
               <span
                 className={cn(
-                  "text-sm",
-                  i === currentStep ? "text-text-primary font-medium" : "text-text-tertiary"
+                  // Constant weight — only the color changes per step, so the
+                  // stepper labels never reflow as you advance.
+                  "text-sm font-medium",
+                  i === currentStep ? "text-text-primary" : "text-text-tertiary"
                 )}
               >
                 {step.label}
@@ -115,7 +117,7 @@ export default function OnboardingLayout({ onComplete }: OnboardingLayoutProps) 
           <button
             onClick={handleBack}
             disabled={currentStep === 0}
-            className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-150 ease-out motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
           >
             Back
           </button>
@@ -131,11 +133,11 @@ export default function OnboardingLayout({ onComplete }: OnboardingLayoutProps) 
             <button
             onClick={footer.onClick}
             disabled={footer.disabled || footer.loading}
-            className="relative overflow-hidden px-6 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-w-[120px]"
+            className="relative overflow-hidden px-6 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150 ease-out motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary min-w-[120px]"
           >
             {footer.loading && footer.progress != null && (
               <div
-                className="absolute inset-0 bg-white/15 transition-all duration-300"
+                className="absolute inset-0 bg-white/15 transition-[width] duration-300 motion-reduce:transition-none"
                 style={{ width: `${footer.progress}%` }}
               />
             )}

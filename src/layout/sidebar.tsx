@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
-import { getCurrentWindow } from "@tauri-apps/api/window";
 import { open } from "@tauri-apps/plugin-shell";
 import cn from "../shared/lib/utils/cn";
+import Button from "../shared/components/button/button";
 import appVersion from "../shared/constants/app-version";
 import useUpdateCheck from "../shared/hooks/use-update-check";
 import sidebarNavItems from "./sidebar-nav-items";
@@ -11,20 +11,12 @@ export default function Sidebar() {
 
   return (
     <aside className="w-[172px] min-w-[172px] h-full bg-bg-secondary border-r border-border flex flex-col">
+      {/* Left padding reserves room for the native macOS traffic lights,
+          which the Overlay titlebar floats over this corner. */}
       <div
         data-tauri-drag-region
-        className="flex items-center gap-2.5 px-4 h-11 shrink-0 border-b border-border"
+        className="flex items-center pl-[78px] pr-4 h-11 shrink-0 border-b border-border"
       >
-        <div className="flex items-center gap-1.5">
-          <button
-            onClick={() => getCurrentWindow().close()}
-            className="w-3 h-3 rounded-full bg-[#ff5f57] hover:brightness-90 transition-all"
-          />
-          <button
-            onClick={() => getCurrentWindow().minimize()}
-            className="w-3 h-3 rounded-full bg-[#febc2e] hover:brightness-90 transition-all"
-          />
-        </div>
         <span
           data-tauri-drag-region
           className="text-[13px] font-medium text-text-secondary"
@@ -41,9 +33,13 @@ export default function Sidebar() {
             end={item.to === "/"}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] transition-colors duration-150",
+                // font-medium is constant across states — only color/bg change,
+                // so the active item never shifts the layout.
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium",
+                "transition-colors duration-150 ease-out motion-reduce:transition-none",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
                 isActive
-                  ? "bg-accent-subtle text-accent font-medium"
+                  ? "bg-accent-subtle text-accent"
                   : "text-text-secondary hover:bg-bg-tertiary hover:text-text-primary"
               )
             }
@@ -55,14 +51,15 @@ export default function Sidebar() {
       </nav>
 
       <div className="px-4 py-3 border-t border-border">
-        <div className="text-[11px] text-text-tertiary">v{appVersion}</div>
+        <div className="text-[11px] text-text-tertiary tabular-nums">v{appVersion}</div>
         {updateAvailable && (
-          <button
+          <Button
+            variant="link"
             onClick={() => open("https://loqui.impulselab.ai")}
-            className="text-[11px] text-accent hover:underline"
+            className="text-[11px]"
           >
             Update available
-          </button>
+          </Button>
         )}
       </div>
     </aside>

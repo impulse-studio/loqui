@@ -23,6 +23,7 @@ MAGIC:ghost
 MAGIC:secondary
 MAGIC:accent
 MAGIC:default
+MAGIC:link
 
 # Config key — only 2 files, not worth extracting
 MAGIC:sttModel

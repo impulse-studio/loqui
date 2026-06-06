@@ -80,7 +80,7 @@ export default function LlmModelDownloadRow({
           <div className="mt-2 space-y-1">
             <div className="h-1.5 rounded-full bg-bg-tertiary overflow-hidden">
               <div
-                className="h-full bg-accent rounded-full transition-all duration-300"
+                className="h-full bg-accent rounded-full transition-[width] duration-300 motion-reduce:transition-none"
                 style={{ width: `${percent}%` }}
               />
             </div>

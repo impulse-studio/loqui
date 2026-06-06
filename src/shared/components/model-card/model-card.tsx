@@ -20,7 +20,9 @@ export default function ModelCard({ model, selected, disabled, onSelect }: Model
       onClick={onSelect}
       disabled={disabled}
       className={cn(
-        "flex flex-col items-center gap-2 p-4 rounded-xl border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
+        "flex flex-col items-center gap-2 p-4 rounded-xl border cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
+        "transition-colors duration-150 ease-out motion-reduce:transition-none",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary",
         selected
           ? "border-accent bg-accent/5"
           : "border-border bg-bg-card hover:border-text-tertiary"
