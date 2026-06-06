@@ -13,7 +13,7 @@ use tauri::{AppHandle, LogicalSize, Manager, PhysicalPosition, WebviewWindow};
 /// calling AppKit off-main crashes the process.
 pub fn show(app_handle: &AppHandle) {
     let app = app_handle.clone();
-    let _ = app_handle.run_on_main_thread(move || {
+    if let Err(e) = app_handle.run_on_main_thread(move || {
         #[cfg(target_os = "macos")]
         {
             use tauri_nspanel::ManagerExt;
@@ -30,7 +30,9 @@ pub fn show(app_handle: &AppHandle) {
                 let _ = widget.show();
             }
         }
-    });
+    }) {
+        log::error!("Failed to dispatch widget show to main thread: {e}");
+    }
 }
 
 /// Restore the widget to the user's configured visibility. Called when the
@@ -51,7 +53,7 @@ pub fn restore_visibility(app_handle: &AppHandle) {
     }
 
     let app = app_handle.clone();
-    let _ = app_handle.run_on_main_thread(move || {
+    if let Err(e) = app_handle.run_on_main_thread(move || {
         #[cfg(target_os = "macos")]
         {
             use tauri_nspanel::ManagerExt;
@@ -64,7 +66,9 @@ pub fn restore_visibility(app_handle: &AppHandle) {
         if let Some(widget) = app.get_webview_window("widget") {
             let _ = widget.hide();
         }
-    });
+    }) {
+        log::error!("Failed to dispatch widget hide to main thread: {e}");
+    }
 }
 
 pub fn apply_position_and_size(
